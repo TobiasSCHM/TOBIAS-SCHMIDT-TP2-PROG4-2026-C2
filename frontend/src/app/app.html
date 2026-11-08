@@ -1,0 +1,10 @@
+<main>
+  <h1>Red Social</h1>
+  @if (estado(); as e) {
+    <p>Backend: {{ e.estado }} · Mongo: {{ e.mongo }}</p>
+  } @else if (error(); as mensaje) {
+    <p>{{ mensaje }}</p>
+  } @else {
+    <p>Conectando…</p>
+  }
+</main>
