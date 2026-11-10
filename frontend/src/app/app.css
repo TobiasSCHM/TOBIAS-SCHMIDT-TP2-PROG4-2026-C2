@@ -1,0 +1,6 @@
+/* la barra queda fija arriba y se acomoda en pantallas chicas */
+.barra { position: sticky; top: 0; z-index: 10; height: auto; min-height: 64px; flex-wrap: wrap; padding: 8px 16px; }
+.marca { display: flex; align-items: center; gap: 8px; color: inherit; text-decoration: none; font-size: 20px; font-weight: 500; }
+.espaciador { flex: 1 1 auto; }
+.enlaces { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.activo { background: rgba(255, 255, 255, 0.18); }

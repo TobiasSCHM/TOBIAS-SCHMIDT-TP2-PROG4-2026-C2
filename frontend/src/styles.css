@@ -1,1 +1,14 @@
 /* You can add global styles to this file, and also import other style files */
+/* estilos globales de la app: se agregan al final, sin borrar lo que puso angular material */
+html, body { height: 100%; }
+body { margin: 0; background: #f4f6fb; }
+
+/* anchos de pagina: uno para pantallas de contenido y otro angosto para formularios */
+.contenedor { max-width: 960px; margin: 24px auto; padding: 0 16px; }
+.contenedor-angosto { max-width: 480px; margin: 24px auto; padding: 0 16px; }
+
+/* formularios: los campos ocupan todo el ancho de la tarjeta */
+.formulario { display: flex; flex-direction: column; gap: 4px; }
+.formulario mat-form-field { width: 100%; }
+.acciones { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
+.texto-suave { color: rgba(0, 0, 0, 0.6); }

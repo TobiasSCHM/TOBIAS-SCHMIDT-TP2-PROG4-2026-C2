@@ -1,10 +1,17 @@
+<mat-toolbar color="primary" class="barra">
+  <a class="marca" routerLink="/publicaciones">
+    <mat-icon>forum</mat-icon>
+    <span>Red Social</span>
+  </a>
+  <span class="espaciador"></span>
+  <nav class="enlaces">
+    <a mat-button routerLink="/publicaciones" routerLinkActive="activo">Publicaciones</a>
+    <a mat-button routerLink="/mi-perfil" routerLinkActive="activo">Mi perfil</a>
+    <a mat-button routerLink="/login" routerLinkActive="activo">Ingresar</a>
+    <a mat-flat-button routerLink="/registro">Registrarme</a>
+  </nav>
+</mat-toolbar>
+
 <main>
-  <h1>Red Social</h1>
-  @if (estado(); as e) {
-    <p>Backend: {{ e.estado }} · Mongo: {{ e.mongo }}</p>
-  } @else if (error(); as mensaje) {
-    <p>{{ mensaje }}</p>
-  } @else {
-    <p>Conectando…</p>
-  }
+  <router-outlet />
 </main>

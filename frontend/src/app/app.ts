@@ -1,28 +1,14 @@
-import { Component, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../environments/environment';
+import { Component } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
-interface EstadoApi {
-  estado: string;
-  mongo: string;
-  fecha: string;
-}
-
+// estructura general de la app: barra superior + la pantalla que corresponde a la ruta
 @Component({
   selector: 'app-root',
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, MatToolbarModule, MatButtonModule, MatIconModule],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
-export class App {
-  private readonly http = inject(HttpClient);
-  protected readonly estado = signal<EstadoApi | null>(null);
-  protected readonly error = signal<string | null>(null);
-
-  constructor() {
-    // prueba de punta a punta: front -> backend -> mongo
-    this.http.get<EstadoApi>(`${environment.apiUrl}/salud`).subscribe({
-      next: (respuesta) => this.estado.set(respuesta),
-      error: () => this.error.set('No se pudo conectar con el backend.'),
-    });
-  }
-}
+export class App {}
