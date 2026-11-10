@@ -51,6 +51,30 @@ export class UsuariosService {
     }
   }
 
+  // responde 409 si el correo o el nombre de usuario ya existen. se llama ANTES de subir la imagen
+  // de perfil, para no dejar imagenes huerfanas. el indice unico de mongo sigue siendo la defensa final
+  async verificarDisponibles(correo: string, nombreUsuario: string): Promise<void> {
+    const correoNormalizado = correo.trim().toLowerCase();
+    const usuarioNormalizado = nombreUsuario.trim().toLowerCase();
+    const existente = await this.modelo
+      .findOne({ $or: [{ correo: correoNormalizado }, { nombreUsuario: usuarioNormalizado }] })
+      .select('correo nombreUsuario')
+      .exec();
+    if (!existente) return;
+    if (existente.correo === correoNormalizado) throw new ConflictException('Ese correo ya está registrado.');
+    throw new ConflictException('Ese nombre de usuario ya está en uso.');
+  }
+
+  // para el login: acepta correo o nombre de usuario y trae tambien la contrasena hasheada
+  // (el esquema la oculta por defecto con select: false)
+  buscarParaLogin(identificador: string): Promise<UsuarioDocument | null> {
+    const valor = identificador.trim().toLowerCase();
+    return this.modelo
+      .findOne({ $or: [{ correo: valor }, { nombreUsuario: valor }] })
+      .select('+contrasena')
+      .exec();
+  }
+
   publico(usuario: UsuarioDocument): UsuarioPublico {
     return {
       id: usuario.id,
