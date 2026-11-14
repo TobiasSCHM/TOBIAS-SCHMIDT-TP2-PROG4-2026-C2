@@ -1,0 +1,8 @@
+.bloque-imagen { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+.avatar { width: 96px; height: 96px; border-radius: 50%; object-fit: cover; border: 2px solid #1976d2; }
+.avatar-vacio { width: 96px; height: 96px; font-size: 96px; color: #9aa4b2; }
+.acciones-imagen { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.acciones-imagen p { margin: 0; font-size: 13px; }
+.error-texto { color: #c62828; }
+/* el boton de enviar muestra el spinner al lado del texto */
+button[type='submit'] { display: inline-flex; align-items: center; gap: 8px; }

@@ -1,41 +1,30 @@
-import { Component, inject } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
+import { Component } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
-import { ModalService } from '../../shared/modal/modal.service';
+import { MatIconModule } from '@angular/material/icon';
 
-// botones provisionales para probar los modales de información, error y confirmacion
+// sprint 1: la pantalla existe y se puede navegar hasta ella. el listado llega en el sprint 2
 @Component({
   selector: 'app-publicaciones',
-  imports: [MatCardModule, MatButtonModule],
+  imports: [MatCardModule, MatIconModule],
   template: `
     <div class="contenedor">
+      <h1 class="titulo-pagina">Publicaciones</h1>
+      <p class="texto-suave">Acá se muestran las publicaciones de los usuarios.</p>
       <mat-card>
-        <mat-card-header><mat-card-title>Publicaciones</mat-card-title></mat-card-header>
-        <mat-card-content>
-          <p class="texto-suave">Acá va el listado de publicaciones.</p>
-          <div class="acciones">
-            <button mat-stroked-button (click)="probarInformacion()">Probar modal de información</button>
-            <button mat-stroked-button (click)="probarError()">Probar modal de error</button>
-            <button mat-stroked-button (click)="probarConfirmacion()">Probar confirmación</button>
-          </div>
+        <mat-card-content class="vacio">
+          <mat-icon>article</mat-icon>
+          <h2>Todavía no hay publicaciones</h2>
+          <p class="texto-suave">Cuando haya publicaciones, las vas a encontrar acá.</p>
         </mat-card-content>
       </mat-card>
     </div>
   `,
+  styles: `
+    .titulo-pagina { margin: 0 0 4px; font-size: 28px; font-weight: 500; }
+    .vacio { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 40px 16px; }
+    .vacio mat-icon { width: 64px; height: 64px; font-size: 64px; color: #9aa4b2; }
+    .vacio h2 { margin: 16px 0 4px; font-weight: 500; }
+    .vacio p { margin: 0; }
+  `,
 })
-export class Publicaciones {
-  private readonly modal = inject(ModalService);
-
-  protected probarInformacion(): void {
-    void this.modal.informar('Este es un mensaje informativo.');
-  }
-
-  protected probarError(): void {
-    void this.modal.error('Algo salió mal. Probá de nuevo.');
-  }
-
-  protected async probarConfirmacion(): Promise<void> {
-    const confirmo = await this.modal.confirmar('¿Querés continuar con la acción?');
-    await this.modal.informar(confirmo ? 'Elegiste continuar.' : 'Cancelaste la acción.');
-  }
-}
+export class Publicaciones {}

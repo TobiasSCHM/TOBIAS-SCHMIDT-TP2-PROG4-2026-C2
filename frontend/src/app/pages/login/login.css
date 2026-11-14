@@ -1,0 +1,2 @@
+/* el boton de enviar muestra el spinner al lado del texto */
+button[type='submit'] { display: inline-flex; align-items: center; gap: 8px; }

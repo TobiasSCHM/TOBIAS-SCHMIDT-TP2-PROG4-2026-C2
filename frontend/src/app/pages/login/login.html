@@ -1,0 +1,46 @@
+<div class="contenedor-angosto">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Ingresar</mat-card-title>
+      <mat-card-subtitle>Usá tu correo o tu nombre de usuario</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form class="formulario" [formGroup]="form" (ngSubmit)="enviar()" novalidate>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Correo o nombre de usuario</mat-label>
+          <input matInput formControlName="identificador" autocomplete="username" />
+          <mat-error>{{ mensajeError('identificador') }}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Contraseña</mat-label>
+          <input matInput [type]="verContrasena() ? 'text' : 'password'" formControlName="contrasena" autocomplete="current-password" />
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="verContrasena.set(!verContrasena())"
+            [attr.aria-label]="verContrasena() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+          >
+            <mat-icon>{{ verContrasena() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error>{{ mensajeError('contrasena') }}</mat-error>
+        </mat-form-field>
+
+        <div class="acciones">
+          <button mat-flat-button type="submit" [disabled]="cargando()">
+            @if (cargando()) {
+              <mat-spinner diameter="20" />
+              <span>Ingresando…</span>
+            } @else {
+              Ingresar
+            }
+          </button>
+          <a mat-button routerLink="/registro">Crear cuenta</a>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,6 +1,33 @@
 /* la barra queda fija arriba y se acomoda en pantallas chicas */
-.barra { position: sticky; top: 0; z-index: 10; height: auto; min-height: 64px; flex-wrap: wrap; padding: 8px 16px; }
-.marca { display: flex; align-items: center; gap: 8px; color: inherit; text-decoration: none; font-size: 20px; font-weight: 500; }
+.barra {
+  position: sticky; top: 0; z-index: 10; height: auto; min-height: 76px; flex-wrap: wrap; padding: 8px 16px;
+
+  /* colores FireLink: fondo naranja y texto/botones en el marron oscuro */
+  --mat-toolbar-container-background-color: #cd7c24;
+  --mat-toolbar-container-text-color: #402e32;
+  --mat-button-text-label-text-color: #402e32;
+  --mat-button-text-state-layer-color: #402e32;
+  --mat-button-filled-container-color: #402e32;
+  --mat-button-filled-label-text-color: #fbf6f1;
+  background: #cd7c24;
+  color: #402e32;
+
+  /* borde grueso abajo en lugar de sombra difusa */
+  border-bottom: 3px solid #402e32;
+  box-shadow: none;
+}
+
+.marca { display: flex; align-items: center; gap: 12px; color: inherit; text-decoration: none; }
+.logo { display: block; width: 56px; height: 56px; transition: transform 0.15s ease; }
+.marca:hover .logo { transform: rotate(-6deg) scale(1.05); }
+.nombre { font-family: 'Asimovian', sans-serif; font-size: 30px; font-weight: 400; letter-spacing: 0.03em; line-height: 1; }
+
 .espaciador { flex: 1 1 auto; }
-.enlaces { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
-.activo { background: rgba(255, 255, 255, 0.18); }
+.enlaces { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+/* link activo: bloque crema en vez de un gris translucido */
+.activo { background: #fbf6f1; }
+
+/* en la barra los botones llenos van sin sombra dura (el fondo ya es naranja) */
+.barra .mat-mdc-unelevated-button:not(:disabled) { box-shadow: none; }
+.barra .mat-mdc-unelevated-button:not(:disabled):active { transform: none; }

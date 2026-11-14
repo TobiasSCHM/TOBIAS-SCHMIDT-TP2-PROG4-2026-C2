@@ -1,7 +1,39 @@
 /* You can add global styles to this file, and also import other style files */
 /* estilos globales de la app: se agregan al final, sin borrar lo que puso angular material */
+
+/* paleta FireLink: se pisan las variables de material para que toda la app use estos colores */
+:root {
+  --fl-naranja: #cd7c24;   /* navbar */
+  --fl-marron: #7e564b;    /* color primario de la app */
+  --fl-oscuro: #402e32;    /* texto y bordes */
+  --fl-fondo: #fbf6f1;     /* tono claro derivado para el fondo */
+  --fl-papel: #fffdfa;     /* tarjetas y modales */
+
+  --mat-sys-primary: #7e564b;
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #f4e1cf;
+  --mat-sys-on-primary-container: #402e32;
+  --mat-sys-surface-tint: #7e564b;
+  --mat-sys-on-surface: #402e32;
+  --mat-sys-outline: #7e564b;
+  --mat-sys-outline-variant: #cdb8ae;
+
+  /* formas: nada de pildoras ni ovalos, esquinas mas cuadradas */
+  --mat-sys-corner-extra-small: 12px;
+  --mat-sys-corner-small: 12px;
+  --mat-sys-corner-medium: 18px;
+  --mat-sys-corner-large: 20px;
+  --mat-sys-corner-extra-large: 24px;
+  --mat-sys-corner-full: 16px;
+
+  --mat-card-elevated-container-color: #fffdfa;
+  --mat-dialog-container-color: #fffdfa;
+  --mat-button-outlined-outline-color: #402e32;
+  --mat-button-outlined-outline-width: 2px;
+}
+
 html, body { height: 100%; }
-body { margin: 0; background: #f4f6fb; }
+body { margin: 0; background: var(--fl-fondo); }
 
 /* anchos de pagina: uno para pantallas de contenido y otro angosto para formularios */
 .contenedor { max-width: 960px; margin: 24px auto; padding: 0 16px; }
@@ -11,4 +43,37 @@ body { margin: 0; background: #f4f6fb; }
 .formulario { display: flex; flex-direction: column; gap: 4px; }
 .formulario mat-form-field { width: 100%; }
 .acciones { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
-.texto-suave { color: rgba(0, 0, 0, 0.6); }
+.texto-suave { color: rgba(64, 46, 50, 0.65); }
+
+/* estilo "sticker": borde grueso y sombra dura en vez de las sombras suaves de material */
+mat-card.mat-mdc-card {
+  border: 2px solid var(--fl-oscuro);
+  box-shadow: 5px 5px 0 var(--fl-oscuro);
+}
+
+.mat-mdc-dialog-container .mat-mdc-dialog-surface {
+  border: 2px solid var(--fl-oscuro);
+  box-shadow: 6px 6px 0 var(--fl-oscuro);
+}
+
+.mat-mdc-unelevated-button:not(:disabled),
+.mat-mdc-outlined-button:not(:disabled) {
+  border: 2px solid var(--fl-oscuro);
+  box-shadow: 3px 3px 0 var(--fl-oscuro);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.mat-mdc-unelevated-button:not(:disabled):active,
+.mat-mdc-outlined-button:not(:disabled):active {
+  transform: translate(3px, 3px);
+  box-shadow: 0 0 0 var(--fl-oscuro);
+}
+
+/* squircles de verdad (chrome/edge 139+); en el resto queda el rectangulo redondeado */
+@supports (corner-shape: squircle) {
+  mat-card.mat-mdc-card,
+  .mat-mdc-dialog-container .mat-mdc-dialog-surface,
+  .mat-mdc-button-base {
+    corner-shape: squircle;
+  }
+}
