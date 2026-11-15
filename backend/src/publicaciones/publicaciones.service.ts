@@ -1,0 +1,127 @@
+import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Types } from 'mongoose';
+import type { Model } from 'mongoose';
+import { AlmacenamientoService } from '../almacenamiento/almacenamiento.service.js';
+import type { ArchivoSubido } from '../almacenamiento/almacenamiento.service.js';
+import type { UsuarioDocument } from '../usuarios/usuario.schema.js';
+import type { CrearPublicacionDto } from './dto/crear-publicacion.dto.js';
+import type { ListarPublicacionesDto } from './dto/listar-publicaciones.dto.js';
+import { Publicacion } from './publicacion.schema.js';
+import type { PublicacionDocument } from './publicacion.schema.js';
+
+// datos del autor que viajan junto a cada publicacion (nunca el correo ni la contrasena)
+export interface AutorPublico {
+  id: string;
+  nombre: string;
+  apellido: string;
+  nombreUsuario: string;
+  imagenPerfilUrl: string | null;
+}
+
+// lo que sale hacia el cliente
+export interface PublicacionPublica {
+  id: string;
+  titulo: string;
+  descripcion: string;
+  imagenUrl: string | null;
+  autor: AutorPublico;
+  cantidadMeGusta: number;
+  createdAt: Date;
+}
+
+// respuesta del listado: la pagina pedida + el total, para que el front pueda armar el paginador
+export interface PaginaPublicaciones {
+  datos: PublicacionPublica[];
+  total: number;
+  offset: number;
+  limit: number;
+}
+
+// solo los campos de la publicacion que usa publica(): sirve tanto para un documento completo
+// como para uno al que se le reemplazo "autor" por los datos del usuario (populate)
+type PublicacionBase = Pick<
+  PublicacionDocument,
+  'id' | 'titulo' | 'descripcion' | 'imagenUrl' | 'cantidadMeGusta' | 'createdAt'
+>;
+
+type AutorResumen = Pick<UsuarioDocument, 'id' | 'nombre' | 'apellido' | 'nombreUsuario' | 'imagenPerfilUrl'>;
+
+@Injectable()
+export class PublicacionesService {
+  constructor(
+    @InjectModel(Publicacion.name) private readonly modelo: Model<Publicacion>,
+    private readonly almacenamiento: AlmacenamientoService,
+  ) {}
+
+  // alta de una publicacion. la imagen es opcional: sin archivo, imagenUrl queda en null
+  async crear(dto: CrearPublicacionDto, autor: UsuarioDocument, archivo?: ArchivoSubido): Promise<PublicacionPublica> {
+    // los datos ya llegaron validados (ValidationPipe corre antes que el controller): una peticion
+    // invalida responde 400 sin haber subido nada a cloudinary
+    const imagenUrl = archivo ? await this.almacenamiento.subirImagen(archivo, 'redsocial/publicaciones') : null;
+
+    const publicacion = await this.modelo.create({
+      titulo: dto.titulo,
+      descripcion: dto.descripcion,
+      imagenUrl,
+      autor: autor._id,
+    });
+
+    return this.publica(publicacion, autor);
+  }
+
+  // listado paginado. ordena por fecha (por defecto) o por cantidad de me gusta, y puede filtrar por autor
+  async listar(consulta: ListarPublicacionesDto): Promise<PaginaPublicaciones> {
+    // las dadas de baja (habilitada: false) nunca se listan
+    const filtro = {
+      habilitada: true,
+      ...(consulta.usuario ? { autor: new Types.ObjectId(consulta.usuario) } : {}),
+    };
+
+    // el segundo criterio (fecha) y el tercero (_id) desempatan: sin ellos, dos publicaciones con los mismos
+    // me gusta podrian cambiar de lugar entre una pagina y la siguiente, y aparecer repetidas o saltearse
+    const orden =
+      consulta.orden === 'meGusta'
+        ? ({ cantidadMeGusta: -1, createdAt: -1, _id: -1 } as const)
+        : ({ createdAt: -1, _id: -1 } as const);
+
+    // la pagina y el total se piden a la vez: no dependen una de la otra
+    const [publicaciones, total] = await Promise.all([
+      this.modelo
+        .find(filtro)
+        .sort(orden)
+        .skip(consulta.offset)
+        .limit(consulta.limit)
+        // reemplaza el id guardado en "autor" por los datos del usuario, pidiendo solo los campos publicos
+        .populate<{ autor: UsuarioDocument }>('autor', 'nombre apellido nombreUsuario imagenPerfilUrl')
+        .exec(),
+      this.modelo.countDocuments(filtro).exec(),
+    ]);
+
+    return {
+      datos: publicaciones.map((p) => this.publica(p, p.autor)),
+      total,
+      offset: consulta.offset,
+      limit: consulta.limit,
+    };
+  }
+
+  // arma la respuesta publica de una publicacion junto con los datos resumidos de su autor
+  private publica(publicacion: PublicacionBase, autor: AutorResumen): PublicacionPublica {
+    return {
+      id: publicacion.id,
+      titulo: publicacion.titulo,
+      descripcion: publicacion.descripcion,
+      imagenUrl: publicacion.imagenUrl,
+      autor: {
+        id: autor.id,
+        nombre: autor.nombre,
+        apellido: autor.apellido,
+        nombreUsuario: autor.nombreUsuario,
+        imagenPerfilUrl: autor.imagenPerfilUrl,
+      },
+      cantidadMeGusta: publicacion.cantidadMeGusta,
+      createdAt: publicacion.createdAt,
+    };
+  }
+}

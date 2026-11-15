@@ -1,5 +1,6 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { isObjectIdOrHexString } from 'mongoose';
 import type { Model } from 'mongoose';
 import { Usuario } from './usuario.schema.js';
 import type { Perfil, UsuarioDocument } from './usuario.schema.js';
@@ -73,6 +74,13 @@ export class UsuariosService {
       .findOne({ $or: [{ correo: valor }, { nombreUsuario: valor }] })
       .select('+contrasena')
       .exec();
+  }
+
+  // sprint 2: busca un usuario por su id. si el texto no tiene forma de id de mongo (24 caracteres hexadecimales)
+  // devuelve null directamente: asi findById no lanza un error de conversion (CastError)
+  buscarPorId(id: string): Promise<UsuarioDocument | null> {
+    if (!isObjectIdOrHexString(id)) return Promise.resolve(null);
+    return this.modelo.findById(id).exec();
   }
 
   publico(usuario: UsuarioDocument): UsuarioPublico {
