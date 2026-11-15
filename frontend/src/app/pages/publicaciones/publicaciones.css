@@ -1,0 +1,21 @@
+.titulo-pagina { margin: 0 0 4px; font-size: 28px; font-weight: 500; }
+
+.barra-orden { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 16px 0 24px; }
+/* la opcion elegida queda rellena con el color primario */
+.opcion.seleccionado {
+  background: var(--mat-sys-primary);
+  --mat-button-outlined-label-text-color: var(--mat-sys-on-primary);
+}
+
+/* margen derecho y abajo: dejan lugar a la sombra dura de las tarjetas */
+.lista { display: flex; flex-direction: column; gap: 28px; margin: 0 6px 6px 0; transition: opacity 0.15s ease; }
+.recargando { opacity: 0.55; pointer-events: none; }
+
+.centrado { display: flex; justify-content: center; padding: 48px 0; }
+
+.vacio { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 40px 16px; }
+.vacio mat-icon { width: 64px; height: 64px; font-size: 64px; color: var(--fl-marron); }
+.vacio h2 { margin: 16px 0 4px; font-weight: 500; }
+.vacio p { margin: 0 0 16px; }
+
+mat-paginator { margin-top: 24px; --mat-paginator-container-background-color: transparent; }

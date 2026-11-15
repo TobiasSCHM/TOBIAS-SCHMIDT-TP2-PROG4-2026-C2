@@ -1,0 +1,21 @@
+.cabecera { display: flex; align-items: center; gap: 12px; padding: 16px 16px 0; }
+.avatar { width: 48px; height: 48px; flex: none; object-fit: cover; border-radius: 14px; border: 2px solid var(--fl-oscuro); }
+.avatar-vacio { font-size: 48px; border: none; color: var(--fl-marron); }
+.autor { display: flex; flex-direction: column; min-width: 0; }
+.nombre { font-weight: 500; }
+.detalle { font-size: 13px; }
+
+.titulo { margin: 16px 0 8px; font-size: 22px; font-weight: 500; overflow-wrap: anywhere; }
+/* pre-line respeta los saltos de linea que escribio el autor */
+.descripcion { margin: 0 0 16px; white-space: pre-line; overflow-wrap: anywhere; }
+.imagen { display: block; width: 100%; max-height: 420px; object-fit: cover; border: 2px solid var(--fl-oscuro); border-radius: 18px; }
+
+.acciones-tarjeta { display: flex; align-items: center; padding: 8px 16px 16px; }
+.espaciador { flex: 1 1 auto; }
+/* cuando ya diste me gusta, el boton queda relleno */
+.me-gusta.dado { background: var(--mat-sys-primary-container); }
+
+/* mismas esquinas "squircle" que el resto de la app (chrome/edge); en otros navegadores queda redondeado normal */
+@supports (corner-shape: squircle) {
+  .avatar, .imagen { corner-shape: squircle; }
+}

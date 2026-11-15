@@ -10,6 +10,7 @@ import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AutenticacionService } from '../../core/autenticacion.service';
 import { mensajeDeError } from '../../core/errores';
+import { SesionService } from '../../core/sesion.service';
 import { contrasenaFuerte, correoONombreUsuario } from '../../core/validators/validadores';
 import { ModalService } from '../../shared/modal/modal.service';
 
@@ -39,6 +40,7 @@ const MENSAJES: Record<CampoLogin, Record<string, string>> = {
 export class Login {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly auth = inject(AutenticacionService);
+  private readonly sesion = inject(SesionService);
   private readonly modal = inject(ModalService);
   private readonly router = inject(Router);
 
@@ -71,6 +73,8 @@ export class Login {
         // el identificador se recorta; la contrasena no (un espacio puede ser parte de ella)
         this.auth.login({ identificador: identificador.trim(), contrasena }),
       );
+      // se guarda quien ingreso: asi el resto de la app (y el interceptor) saben quien es
+      this.sesion.iniciar(usuario);
       await this.modal.informar(`Hola, ${usuario.nombre}. Ingresaste correctamente.`, 'Ingreso exitoso');
       await this.router.navigateByUrl('/publicaciones');
     } catch (error) {
