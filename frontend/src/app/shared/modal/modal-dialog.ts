@@ -37,8 +37,8 @@ export interface DatosModal {
   styles: `
     .titulo { display: flex; align-items: center; gap: 8px; }
     .icono.error { color: #c62828; }
-    .icono.info { color: #1565c0; }
-    .icono.confirmacion { color: #ef6c00; }
+    .icono.info { color: #7e564b; }
+    .icono.confirmacion { color: #cd7c24; }
     .mensaje { margin: 0; white-space: pre-line; }
   `,
 })

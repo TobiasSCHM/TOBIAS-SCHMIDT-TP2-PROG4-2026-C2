@@ -1,0 +1,38 @@
+.titulo-pagina { margin: 0 0 4px; font-size: 28px; font-weight: 500; }
+.subtitulo { margin: 32px 0 16px; font-size: 22px; font-weight: 500; }
+.nota { margin: -8px 0 16px; }
+
+/* margen derecho y abajo: dejan lugar a la sombra dura de las tarjetas */
+.datos { margin: 24px 6px 6px 0; }
+.lista { display: flex; flex-direction: column; gap: 28px; margin: 0 6px 6px 0; }
+
+.encabezado { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; padding: 20px 16px 0; }
+.foto { width: 112px; height: 112px; flex: none; object-fit: cover; border-radius: 28px; border: 2px solid var(--fl-oscuro); }
+.foto-vacia { font-size: 112px; border: none; color: var(--fl-marron); }
+.identidad { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; }
+.nombre-completo { margin: 0; font-size: 26px; font-weight: 500; overflow-wrap: anywhere; }
+.etiqueta {
+  margin-top: 4px; padding: 2px 12px; font-size: 13px; font-weight: 500;
+  background: var(--fl-naranja); border: 2px solid var(--fl-oscuro); border-radius: 10px;
+}
+
+/* datos en cuadricula: se acomodan en 1, 2 o 3 columnas segun el ancho disponible */
+.lista-datos { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px 24px; margin: 20px 0 8px; }
+.lista-datos dt { font-size: 13px; color: rgba(64, 46, 50, 0.65); }
+.lista-datos dd { margin: 2px 0 0; overflow-wrap: anywhere; }
+.lista-datos .ancho { grid-column: 1 / -1; }
+
+/* el contenido que se proyecta dentro de la tarjeta (los comentarios) */
+.comentarios { margin: 0 16px 16px; padding-top: 12px; border-top: 2px dashed var(--mat-sys-outline-variant); }
+.comentarios h3 { margin: 0 0 4px; font-size: 16px; font-weight: 500; }
+.comentarios p { margin: 0; font-size: 14px; }
+
+.centrado { display: flex; justify-content: center; padding: 48px 0; }
+.vacio { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 40px 16px; }
+.vacio mat-icon { width: 64px; height: 64px; font-size: 64px; color: var(--fl-marron); }
+.vacio h3 { margin: 16px 0 4px; font-size: 20px; font-weight: 500; }
+.vacio p { margin: 0 0 16px; }
+
+@supports (corner-shape: squircle) {
+  .foto, .etiqueta { corner-shape: squircle; }
+}

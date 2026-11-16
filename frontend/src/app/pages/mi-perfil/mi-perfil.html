@@ -1,0 +1,89 @@
+<div class="contenedor">
+  <h1 class="titulo-pagina">Mi perfil</h1>
+  <p class="texto-suave">Tus datos y lo último que publicaste.</p>
+
+  @if (sesion.usuario(); as u) {
+    <mat-card class="datos">
+      <div class="encabezado">
+        @if (u.imagenPerfilUrl; as foto) {
+          <img class="foto" [src]="foto" alt="Tu foto de perfil" />
+        } @else {
+          <mat-icon class="foto foto-vacia">account_circle</mat-icon>
+        }
+        <div class="identidad">
+          <h2 class="nombre-completo">{{ u.nombre }} {{ u.apellido }}</h2>
+          <span class="texto-suave">&#64;{{ u.nombreUsuario }}</span>
+          <span class="etiqueta">{{ u.perfil === 'administrador' ? 'Administrador' : 'Usuario' }}</span>
+        </div>
+      </div>
+
+      <mat-card-content>
+        <dl class="lista-datos">
+          <div><dt>Nombre</dt><dd>{{ u.nombre }}</dd></div>
+          <div><dt>Apellido</dt><dd>{{ u.apellido }}</dd></div>
+          <div><dt>Nombre de usuario</dt><dd>{{ u.nombreUsuario }}</dd></div>
+          <div><dt>Correo</dt><dd>{{ u.correo }}</dd></div>
+          <!-- la fecha se guarda como medianoche UTC: se muestra en UTC para que no se corra al dia anterior -->
+          <div><dt>Fecha de nacimiento</dt><dd>{{ u.fechaNacimiento | date: 'dd/MM/yyyy' : 'UTC' }}</dd></div>
+          <div><dt>Perfil</dt><dd>{{ u.perfil === 'administrador' ? 'Administrador' : 'Usuario' }}</dd></div>
+          <div class="ancho"><dt>Descripción</dt><dd>{{ u.descripcion || 'Sin descripción.' }}</dd></div>
+        </dl>
+      </mat-card-content>
+    </mat-card>
+
+    <h2 class="subtitulo">Mis últimas publicaciones</h2>
+
+    @if (error(); as mensaje) {
+      <mat-card>
+        <mat-card-content class="vacio">
+          <mat-icon>error_outline</mat-icon>
+          <h3>No se pudieron cargar tus publicaciones</h3>
+          <p class="texto-suave">{{ mensaje }}</p>
+          <button mat-flat-button type="button" (click)="cargar()">Reintentar</button>
+        </mat-card-content>
+      </mat-card>
+    } @else if (publicaciones(); as lista) {
+      @if (lista.length === 0) {
+        <mat-card>
+          <mat-card-content class="vacio">
+            <mat-icon>article</mat-icon>
+            <h3>Todavía no publicaste nada</h3>
+            <p class="texto-suave">Tus publicaciones van a aparecer acá.</p>
+          </mat-card-content>
+        </mat-card>
+      } @else {
+        @if (total() > lista.length) {
+          <p class="texto-suave nota">Mostrando tus últimas {{ lista.length }} de {{ total() }} publicaciones.</p>
+        }
+        <div class="lista">
+          @for (publicacion of lista; track publicacion.id) {
+            <app-publicacion-card
+              [publicacion]="publicacion"
+              [esPropia]="true"
+              [ocupada]="procesando().includes(publicacion.id)"
+              (alternarMeGusta)="alternarMeGusta($event)"
+              (eliminar)="eliminar($event)"
+            >
+              <!-- espacio reservado: el backend de comentarios llega en el sprint 3 -->
+              <section class="comentarios">
+                <h3>Comentarios</h3>
+                <p class="texto-suave">Los comentarios de esta publicación van a aparecer acá.</p>
+              </section>
+            </app-publicacion-card>
+          }
+        </div>
+      }
+    } @else {
+      <div class="centrado"><mat-spinner diameter="48" /></div>
+    }
+  } @else {
+    <mat-card>
+      <mat-card-content class="vacio">
+        <mat-icon>lock</mat-icon>
+        <h3>Ingresá para ver tu perfil</h3>
+        <p class="texto-suave">Necesitás iniciar sesión para ver tus datos y publicaciones.</p>
+        <a mat-flat-button routerLink="/login">Ingresar</a>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>
