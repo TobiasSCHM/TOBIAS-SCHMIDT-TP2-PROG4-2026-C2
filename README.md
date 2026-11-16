@@ -270,10 +270,6 @@ El frontend valida para dar una respuesta inmediata al usuario, y el backend val
 
 Todos los mensajes de la aplicación se muestran mediante un servicio de modales reutilizable (`ModalService`), construido sobre Angular Material.
 
-### Autenticación y JWT
-
-La implementación de JWT está prevista para una etapa posterior del trabajo práctico (Sprint 3). En esta etapa, el inicio de sesión verifica las credenciales y devuelve los datos públicos del usuario.
-
 ---
 
 ## Endpoints principales
