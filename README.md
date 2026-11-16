@@ -4,7 +4,7 @@ Aplicación web de una red social desarrollada como Trabajo Práctico N.º 2 de 
 
 **Alumno:** Tobias Schmidt
 
-**Deploy (frontend):** <COMPLETAR-URL-DE-VERCEL>
+**Deploy (frontend):** tobias-schmidt-tp2-prog4-c2.vercel.app
 
 **API (backend):** https://tobias-schmidt-tp2-prog4-2026-c2.onrender.com
 
