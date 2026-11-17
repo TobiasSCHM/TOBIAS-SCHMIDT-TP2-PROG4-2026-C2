@@ -461,13 +461,6 @@ La colección de Thunder Client se encuentra en `backend/pruebas/coleccion-thund
 
 ---
 
-## Pendiente para el Sprint 3
-
-- Reemplazar la identificación provisoria por autenticación con token JWT y proteger las rutas del frontend con guards.
-- Comentarios en las publicaciones.
-
----
-
 ## Estado del proyecto
 
 Trabajo Práctico N.º 2 — Programación IV.
