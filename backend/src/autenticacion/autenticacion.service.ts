@@ -2,20 +2,29 @@ import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/
 import { compare, hash } from 'bcryptjs';
 import { AlmacenamientoService } from '../almacenamiento/almacenamiento.service.js';
 import type { ArchivoSubido } from '../almacenamiento/almacenamiento.service.js';
+import type { UsuarioDocument } from '../usuarios/usuario.schema.js';
 import { UsuariosService } from '../usuarios/usuarios.service.js';
 import type { UsuarioPublico } from '../usuarios/usuarios.service.js';
 import type { LoginDto } from './dto/login.dto.js';
 import type { RegistroDto } from './dto/registro.dto.js';
+import { TokenService } from './token.service.js';
+
+// respuesta de registro y login: el token jwt + los datos del usuario (sin la contrasena)
+export interface RespuestaAutenticacion {
+  token: string;
+  usuario: UsuarioPublico;
+}
 
 @Injectable()
 export class AutenticacionService {
   constructor(
     private readonly usuarios: UsuariosService,
     private readonly almacenamiento: AlmacenamientoService,
+    private readonly tokens: TokenService,
   ) {}
 
-  // registro (sprint 1). devuelve el usuario sin la contrasena
-  async registrar(dto: RegistroDto, archivo?: ArchivoSubido): Promise<UsuarioPublico> {
+  // registro (sprint 1). desde el sprint 3 tambien devuelve el token: el usuario queda logueado al registrarse
+  async registrar(dto: RegistroDto, archivo?: ArchivoSubido): Promise<RespuestaAutenticacion> {
     if (dto.contrasena !== dto.repetirContrasena) {
       throw new BadRequestException('Las contraseñas no coinciden.');
     }
@@ -45,12 +54,11 @@ export class AutenticacionService {
       imagenPerfilUrl,
     });
 
-    return this.usuarios.publico(usuario);
+    return this.respuesta(usuario);
   }
 
-  // login (sprint 1): correo o nombre de usuario + contrasena. devuelve los datos del usuario (sin la contrasena).
-  // el token jwt llega en el sprint 3
-  async login(dto: LoginDto): Promise<UsuarioPublico> {
+  // login correo o nombre de usuario + contrasena. desde el sprint 3 devuelve ademas el token
+  async login(dto: LoginDto): Promise<RespuestaAutenticacion> {
     const usuario = await this.usuarios.buscarParaLogin(dto.identificador);
     // compare hashea lo que escribio el usuario y lo compara con el hash guardado
     const coincide = usuario ? await compare(dto.contrasena, usuario.contrasena) : false;
@@ -59,6 +67,20 @@ export class AutenticacionService {
     if (!usuario || !coincide) {
       throw new UnauthorizedException('Usuario o contraseña incorrectos.');
     }
+    return this.respuesta(usuario);
+  }
+
+  autorizar(usuario: UsuarioDocument): UsuarioPublico {
     return this.usuarios.publico(usuario);
+  }
+
+
+  async refrescar(usuario: UsuarioDocument): Promise<{ token: string }> {
+    return { token: await this.tokens.generar(usuario) };
+  }
+
+  // arma la respuesta de registro y login
+  private async respuesta(usuario: UsuarioDocument): Promise<RespuestaAutenticacion> {
+    return { token: await this.tokens.generar(usuario), usuario: this.usuarios.publico(usuario) };
   }
 }

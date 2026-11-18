@@ -8,8 +8,8 @@ import type { UsuarioDocument } from '../usuarios/usuario.schema.js';
 import type { CrearPublicacionDto } from './dto/crear-publicacion.dto.js';
 import type { ListarPublicacionesDto } from './dto/listar-publicaciones.dto.js';
 import { MeGusta } from './megusta.schema.js';
-import { Publicacion } from './publicacion.schema';
-import type { PublicacionDocument } from './publicacion.schema';
+import { Publicacion } from './publicacion.schema.js';
+import type { PublicacionDocument } from './publicacion.schema.js';
 
 // datos del autor que viajan junto a cada publicacion (nunca el correo ni la contrasena)
 export interface AutorPublico {
