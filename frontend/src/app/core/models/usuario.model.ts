@@ -14,3 +14,9 @@ export interface Usuario {
   perfil: Perfil;
   habilitado: boolean;
 }
+
+// lo que responden el registro y el login (sprint 3): el token jwt + los datos del usuario
+export interface RespuestaAutenticacion {
+  token: string;
+  usuario: Usuario;
+}

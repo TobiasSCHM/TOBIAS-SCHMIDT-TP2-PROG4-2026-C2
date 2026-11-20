@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import type { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import type { Usuario } from './models/usuario.model';
+import type { RespuestaAutenticacion } from './models/usuario.model';
 
 export interface CredencialesLogin {
   identificador: string; // correo o nombre de usuario
@@ -16,12 +16,12 @@ export class AutenticacionService {
 
   // multipart/form-data: campos de texto + el archivo "imagenPerfil".
   // no se fija el content-type a mano: el navegador agrega el boundary que el servidor necesita para leer el archivo
-  registrar(datos: FormData): Observable<Usuario> {
-    return this.http.post<Usuario>(`${this.api}/auth/registro`, datos);
+  registrar(datos: FormData): Observable<RespuestaAutenticacion> {
+    return this.http.post<RespuestaAutenticacion>(`${this.api}/auth/registro`, datos);
   }
 
-  // login: json simple (no hay archivo). el backend responde los datos del usuario, sin la contrasena
-  login(credenciales: CredencialesLogin): Observable<Usuario> {
-    return this.http.post<Usuario>(`${this.api}/auth/login`, credenciales);
+  // login: json simple (no hay archivo). el backend responde el token y los datos del usuario, sin la contrasena
+  login(credenciales: CredencialesLogin): Observable<RespuestaAutenticacion> {
+    return this.http.post<RespuestaAutenticacion>(`${this.api}/auth/login`, credenciales);
   }
 }

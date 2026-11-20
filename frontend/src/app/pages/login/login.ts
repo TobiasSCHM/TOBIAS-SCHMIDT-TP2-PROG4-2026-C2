@@ -69,12 +69,12 @@ export class Login {
 
     this.cargando.set(true);
     try {
-      const usuario = await firstValueFrom(
+      const { token, usuario } = await firstValueFrom(
         // el identificador se recorta; la contrasena no (un espacio puede ser parte de ella)
         this.auth.login({ identificador: identificador.trim(), contrasena }),
       );
-      // se guarda quien ingreso: asi el resto de la app (y el interceptor) saben quien es
-      this.sesion.iniciar(usuario);
+      // se guarda el token y quien ingreso (en el navegador): asi el resto de la app y el interceptor saben quien es
+      this.sesion.iniciar(token, usuario);
       await this.modal.informar(`Hola, ${usuario.nombre}. Ingresaste correctamente.`, 'Ingreso exitoso');
       await this.router.navigateByUrl('/publicaciones');
     } catch (error) {

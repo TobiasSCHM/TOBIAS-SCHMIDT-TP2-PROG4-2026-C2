@@ -11,6 +11,7 @@ import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AutenticacionService } from '../../core/autenticacion.service';
 import { mensajeDeError } from '../../core/errores';
+import { SesionService } from '../../core/sesion.service';
 import { contrasenaFuerte, fechaDeHoy, fechaNoFutura, igualA } from '../../core/validators/validadores';
 import { ModalService } from '../../shared/modal/modal.service';
 
@@ -59,6 +60,7 @@ const MENSAJES: Record<CampoRegistro, Record<string, string>> = {
 export class Registro {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly auth = inject(AutenticacionService);
+  private readonly sesion = inject(SesionService);
   private readonly modal = inject(ModalService);
   private readonly router = inject(Router);
 
@@ -150,9 +152,11 @@ export class Registro {
 
     this.cargando.set(true);
     try {
-      await firstValueFrom(this.auth.registrar(datos));
-      await this.modal.informar('Tu cuenta fue creada correctamente. Ahora podés iniciar sesión.', 'Registro exitoso');
-      await this.router.navigateByUrl('/login');
+      const { token, usuario } = await firstValueFrom(this.auth.registrar(datos));
+      // el backend ya devuelve el token: el usuario queda logueado y no hace falta pasar por el login
+      this.sesion.iniciar(token, usuario);
+      await this.modal.informar('Tu cuenta fue creada correctamente. Ya iniciaste sesión.', 'Registro exitoso');
+      await this.router.navigateByUrl('/publicaciones');
     } catch (error) {
       await this.modal.error(mensajeDeError(error), 'No se pudo completar el registro');
     } finally {
