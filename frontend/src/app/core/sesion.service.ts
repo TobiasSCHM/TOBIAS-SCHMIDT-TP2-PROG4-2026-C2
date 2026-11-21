@@ -16,19 +16,20 @@ export class SesionService {
   // signal: las pantallas que lo leen se actualizan solas cuando cambia
   private readonly datos = signal<SesionGuardada | null>(this.leer());
 
-  // solo lectura hacia afuera: para cambiarlos hay que usar iniciar() o cerrar()
+  // solo lectura hacia afuera: para cambiarlos hay que usar iniciar(), actualizarUsuario() o cerrar()
   readonly usuario = computed(() => this.datos()?.usuario ?? null);
   readonly token = computed(() => this.datos()?.token ?? null);
   readonly activa = computed(() => this.datos() !== null);
 
   iniciar(token: string, usuario: Usuario): void {
-    const sesion: SesionGuardada = { token, usuario };
-    this.datos.set(sesion);
-    try {
-      localStorage.setItem(CLAVE, JSON.stringify(sesion));
-    } catch {
-      // sin almacenamiento disponible (modo privado, etc.): la sesion dura hasta que se recargue la pagina
-    }
+    this.guardar({ token, usuario });
+  }
+
+  // cambia los datos del usuario y conserva el token (lo usa la pantalla "cargando": el backend devuelve
+  // los datos actuales del usuario al validar el token). sin sesion iniciada no hace nada
+  actualizarUsuario(usuario: Usuario): void {
+    const actual = this.datos();
+    if (actual) this.guardar({ token: actual.token, usuario });
   }
 
   cerrar(): void {
@@ -37,6 +38,15 @@ export class SesionService {
       localStorage.removeItem(CLAVE);
     } catch {
       // nada que limpiar
+    }
+  }
+
+  private guardar(sesion: SesionGuardada): void {
+    this.datos.set(sesion);
+    try {
+      localStorage.setItem(CLAVE, JSON.stringify(sesion));
+    } catch {
+      // sin almacenamiento disponible (modo privado, etc.): la sesion dura hasta que se recargue la pagina
     }
   }
 

@@ -1,0 +1,21 @@
+<div class="contenedor-angosto">
+  <mat-card>
+    <mat-card-content class="estado" aria-live="polite">
+      @if (error(); as mensaje) {
+        <mat-icon>error_outline</mat-icon>
+        <h2>No se pudo validar tu sesión</h2>
+        <p class="texto-suave">{{ mensaje }}</p>
+        <div class="acciones">
+          <button mat-flat-button type="button" (click)="validar()">Reintentar</button>
+          <a mat-button routerLink="/login">Ir al login</a>
+        </div>
+      } @else {
+        <mat-spinner diameter="56" />
+        <h2>Cargando…</h2>
+        <p class="texto-suave">
+          Estamos validando tu sesión. Si el servidor estaba inactivo, la primera carga puede tardar cerca de un minuto.
+        </p>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

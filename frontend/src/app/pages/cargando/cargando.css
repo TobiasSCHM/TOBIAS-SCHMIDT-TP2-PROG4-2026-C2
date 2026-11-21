@@ -1,0 +1,5 @@
+.estado { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 40px 16px; }
+.estado mat-icon { width: 64px; height: 64px; font-size: 64px; color: var(--fl-marron); }
+.estado h2 { margin: 16px 0 4px; font-weight: 500; }
+.estado p { margin: 0 0 16px; }
+.estado .acciones { justify-content: center; }
