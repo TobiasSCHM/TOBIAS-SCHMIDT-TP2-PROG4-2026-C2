@@ -16,7 +16,7 @@ export class SesionService {
   // signal: las pantallas que lo leen se actualizan solas cuando cambia
   private readonly datos = signal<SesionGuardada | null>(this.leer());
 
-  // solo lectura hacia afuera: para cambiarlos hay que usar iniciar(), actualizarUsuario() o cerrar()
+  // solo lectura hacia afuera: para cambiarlos hay que usar iniciar(), actualizarUsuario(), actualizarToken() o cerrar()
   readonly usuario = computed(() => this.datos()?.usuario ?? null);
   readonly token = computed(() => this.datos()?.token ?? null);
   readonly activa = computed(() => this.datos() !== null);
@@ -30,6 +30,13 @@ export class SesionService {
   actualizarUsuario(usuario: Usuario): void {
     const actual = this.datos();
     if (actual) this.guardar({ token: actual.token, usuario });
+  }
+
+  // cambia el token y conserva al usuario (lo usa la extension de sesion: el backend entrega un token nuevo
+  // con otros 15 minutos). sin sesion iniciada no hace nada
+  actualizarToken(token: string): void {
+    const actual = this.datos();
+    if (actual) this.guardar({ token, usuario: actual.usuario });
   }
 
   cerrar(): void {

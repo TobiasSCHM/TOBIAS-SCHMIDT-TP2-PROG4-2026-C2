@@ -9,11 +9,15 @@ import type { DatosModal } from './modal-dialog';
 export class ModalService {
   private readonly dialog = inject(MatDialog);
 
+  // mientras es true, error() no muestra nada (ver bloquearErrores)
+  private erroresBloqueados = false;
+
   async informar(mensaje: string, titulo = 'Información'): Promise<void> {
     await this.abrir({ titulo, mensaje, tipo: 'info' });
   }
 
   async error(mensaje: string, titulo = 'Ocurrió un problema'): Promise<void> {
+    if (this.erroresBloqueados) return;
     await this.abrir({ titulo, mensaje, tipo: 'error' });
   }
 
@@ -26,6 +30,17 @@ export class ModalService {
   ): Promise<boolean> {
     const respuesta = await this.abrir({ titulo, mensaje, tipo: 'confirmacion', textoConfirmar, textoCancelar });
     return respuesta === true;
+  }
+
+  // cierra todos los modales abiertos (los que estaban esperando una respuesta la reciben como "cancelar")
+  cerrarTodos(): void {
+    this.dialog.closeAll();
+  }
+
+  // cuando la sesion vence, la app avisa con UN solo modal y lleva al login. mientras tanto, los errores
+  // de las pantallas que estaban pidiendo datos (que fallaron por lo mismo) no se muestran: se apilarian encima
+  bloquearErrores(bloquear: boolean): void {
+    this.erroresBloqueados = bloquear;
   }
 
   private abrir(datos: DatosModal): Promise<boolean | undefined> {

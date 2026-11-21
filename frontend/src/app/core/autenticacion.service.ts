@@ -30,4 +30,9 @@ export class AutenticacionService {
   autorizar(): Observable<Usuario> {
     return this.http.post<Usuario>(`${this.api}/auth/autorizar`, {});
   }
+
+  // pide un token nuevo (otros 15 minutos) a cambio del actual. 401 si el actual ya no sirve
+  refrescar(): Observable<{ token: string }> {
+    return this.http.post<{ token: string }>(`${this.api}/auth/refrescar`, {});
+  }
 }
