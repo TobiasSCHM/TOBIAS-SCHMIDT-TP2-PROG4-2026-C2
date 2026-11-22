@@ -6,15 +6,22 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
+import { ComentariosService } from '../../core/comentarios.service';
 import { mensajeDeError } from '../../core/errores';
+import type { PaginaComentarios } from '../../core/models/comentario.model';
 import type { Publicacion } from '../../core/models/publicacion.model';
 import { PublicacionesService } from '../../core/publicaciones.service';
 import { SesionService } from '../../core/sesion.service';
 import { ModalService } from '../../shared/modal/modal.service';
 import { PublicacionCard } from '../../shared/publicacion-card/publicacion-card';
 
-// mi perfil: los datos del usuario logueado y sus ultimas 3 publicaciones.
-// los datos salen de la sesion (lo que devolvio el login); las publicaciones, del backend
+const COMENTARIOS_POR_PUBLICACION = 3; // de cada publicacion se muestran los 3 comentarios mas recientes
+
+// comentarios de una publicacion: undefined = todavia cargando, null = no se pudieron cargar
+type ComentariosDePublicacion = PaginaComentarios | null | undefined;
+
+// mi perfil: los datos del usuario logueado y sus ultimas 3 publicaciones con sus comentarios.
+// los datos salen de la sesion (lo que devolvio el login); las publicaciones y comentarios, del backend
 @Component({
   selector: 'app-mi-perfil',
   imports: [
@@ -26,6 +33,7 @@ import { PublicacionCard } from '../../shared/publicacion-card/publicacion-card'
 })
 export class MiPerfil {
   private readonly servicio = inject(PublicacionesService);
+  private readonly comentariosApi = inject(ComentariosService);
   private readonly modal = inject(ModalService);
   protected readonly sesion = inject(SesionService);
 
@@ -35,6 +43,8 @@ export class MiPerfil {
   protected readonly error = signal<string | null>(null);
   // ids de las publicaciones cuyo me gusta se esta procesando (para evitar doble clic)
   protected readonly procesando = signal<string[]>([]);
+  // comentarios de cada publicacion, por id de publicacion
+  protected readonly comentarios = signal<Record<string, ComentariosDePublicacion>>({});
 
   constructor() {
     if (this.sesion.activa()) void this.cargar();
@@ -50,9 +60,29 @@ export class MiPerfil {
       const pagina = await firstValueFrom(this.servicio.listar({ usuario: usuario.id, orden: 'fecha', limit: 3 }));
       this.publicaciones.set(pagina.datos);
       this.total.set(pagina.total);
+      // los comentarios se piden aparte: las publicaciones se muestran enseguida y cada una
+      // completa su seccion de comentarios cuando llega la respuesta
+      void this.cargarComentarios(pagina.datos);
     } catch (error) {
       this.error.set(mensajeDeError(error));
     }
+  }
+
+  // pide los comentarios mas recientes de cada publicacion (un pedido por publicacion, en paralelo)
+  private async cargarComentarios(publicaciones: Publicacion[]): Promise<void> {
+    await Promise.all(
+      publicaciones.map(async (publicacion) => {
+        try {
+          const pagina = await firstValueFrom(
+            this.comentariosApi.listar(publicacion.id, 0, COMENTARIOS_POR_PUBLICACION),
+          );
+          this.comentarios.update((actual) => ({ ...actual, [publicacion.id]: pagina }));
+        } catch {
+          // si falla una, solo esa publicacion muestra el aviso: las demas siguen normales
+          this.comentarios.update((actual) => ({ ...actual, [publicacion.id]: null }));
+        }
+      }),
+    );
   }
 
   // da o quita el me gusta segun el estado actual de la publicacion

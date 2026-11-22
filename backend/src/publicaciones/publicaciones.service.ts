@@ -123,6 +123,20 @@ export class PublicacionesService {
     };
   }
 
+  // una sola publicacion (para la pagina de la publicacion). 404 si no existe o esta dada de baja.
+  // "usuario" es quien hace el pedido: se usa para marcar si ya le dio me gusta
+  async obtener(idPublicacion: string, usuario: UsuarioDocument): Promise<PublicacionPublica> {
+    const publicacion = await this.modelo
+      .findOne({ _id: new Types.ObjectId(idPublicacion), habilitada: true })
+      .populate<{ autor: UsuarioDocument }>('autor', 'nombre apellido nombreUsuario imagenPerfilUrl')
+      .exec();
+    if (!publicacion) throw new NotFoundException('La publicación no existe.');
+
+    // exists devuelve el documento (o null si no hay): alcanza para saber si ya le dio me gusta
+    const propio = await this.meGustas.exists({ publicacion: publicacion._id, usuario: usuario._id });
+    return this.publica(publicacion, publicacion.autor, propio !== null);
+  }
+
   // dar me gusta. 404 si la publicacion no existe o esta dada de baja, 409 si ya le habia dado me gusta
   async darMeGusta(idPublicacion: string, usuario: UsuarioDocument): Promise<EstadoMeGusta> {
     const publicacion = await this.buscarHabilitada(idPublicacion);
@@ -167,8 +181,9 @@ export class PublicacionesService {
     await publicacion.save();
   }
 
-  // busca una publicacion que exista y no este dada de baja. si no, 404
-  private async buscarHabilitada(id: string): Promise<PublicacionDocument> {
+  // busca una publicacion que exista y no este dada de baja. si no, 404.
+  // es publico porque tambien lo usa ComentariosService: asi la regla "una publicacion dada de baja no existe" vive en un solo lugar
+  async buscarHabilitada(id: string): Promise<PublicacionDocument> {
     const publicacion = await this.modelo.findOne({ _id: new Types.ObjectId(id), habilitada: true }).exec();
     if (!publicacion) throw new NotFoundException('La publicación no existe.');
     return publicacion;

@@ -64,10 +64,43 @@
               (alternarMeGusta)="alternarMeGusta($event)"
               (eliminar)="eliminar($event)"
             >
-              <!-- espacio reservado: el backend de comentarios llega en el sprint 3 -->
+              <!-- los 3 comentarios mas recientes de esta publicacion -->
+              @let c = comentarios()[publicacion.id];
               <section class="comentarios">
-                <h3>Comentarios</h3>
-                <p class="texto-suave">Los comentarios de esta publicación van a aparecer acá.</p>
+                <h3>
+                  Comentarios
+                  @if (c) {
+                    <span class="texto-suave">({{ c.total }})</span>
+                  }
+                </h3>
+
+                @if (c === undefined) {
+                  <mat-spinner diameter="24" />
+                } @else if (c === null) {
+                  <p class="texto-suave">No se pudieron cargar los comentarios.</p>
+                } @else if (c.datos.length === 0) {
+                  <p class="texto-suave">Todavía no hay comentarios en esta publicación.</p>
+                } @else {
+                  @for (comentario of c.datos; track comentario.id) {
+                    <article class="comentario">
+                      <div class="comentario-cabecera">
+                        <span class="comentario-autor">{{ comentario.autor.nombre }} {{ comentario.autor.apellido }}</span>
+                        <span class="texto-suave">
+                          &#64;{{ comentario.autor.nombreUsuario }} · {{ comentario.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+                          @if (comentario.modificado) {
+                            · <span class="editado">(editado)</span>
+                          }
+                        </span>
+                      </div>
+                      <p class="comentario-mensaje">{{ comentario.mensaje }}</p>
+                    </article>
+                  }
+                  @if (c.total > c.datos.length) {
+                    <a mat-button class="ver-todos" [routerLink]="['/publicaciones', publicacion.id]">
+                      Ver los {{ c.total }} comentarios
+                    </a>
+                  }
+                }
               </section>
             </app-publicacion-card>
           }

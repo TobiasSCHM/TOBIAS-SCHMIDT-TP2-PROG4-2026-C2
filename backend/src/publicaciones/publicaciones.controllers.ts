@@ -32,6 +32,12 @@ export class PublicacionesController {
     return this.publicaciones.listar(consulta, usuario);
   }
 
+  // GET /publicaciones/:id -> 200 con la publicacion, 400 id invalido, 401 sin usuario, 404 no existe o esta dada de baja
+  @Get(':id')
+  obtener(@Param() params: IdPublicacionDto, @UsuarioActual() usuario: UsuarioDocument): Promise<PublicacionPublica> {
+    return this.publicaciones.obtener(params.id, usuario);
+  }
+
   // POST /publicaciones (multipart/form-data) -> 201 si se creo, 400 datos invalidos, 401 sin usuario, 413 imagen muy pesada
   @Post()
   @HttpCode(HttpStatus.CREATED)

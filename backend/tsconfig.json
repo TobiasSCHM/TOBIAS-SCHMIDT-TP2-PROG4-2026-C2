@@ -16,6 +16,7 @@
     "outDir": "./dist",
     "rootDir": ".",
     "incremental": true,
+    "tsBuildInfoFile": "./dist/tsconfig.build.tsbuildinfo",
     "skipLibCheck": true,
     "strict": true,
     "strictPropertyInitialization": false

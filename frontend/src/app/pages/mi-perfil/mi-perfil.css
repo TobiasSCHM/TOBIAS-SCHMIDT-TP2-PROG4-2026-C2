@@ -24,8 +24,16 @@
 
 /* el contenido que se proyecta dentro de la tarjeta (los comentarios) */
 .comentarios { margin: 0 16px 16px; padding-top: 12px; border-top: 2px dashed var(--mat-sys-outline-variant); }
-.comentarios h3 { margin: 0 0 4px; font-size: 16px; font-weight: 500; }
+.comentarios h3 { margin: 0 0 8px; font-size: 16px; font-weight: 500; }
 .comentarios p { margin: 0; font-size: 14px; }
+
+/* cada comentario: una cajita con borde, como en la pagina de la publicacion */
+.comentario { margin-bottom: 8px; padding: 10px 12px; background: var(--fl-fondo); border: 2px solid var(--fl-oscuro); border-radius: 12px; }
+.comentario-cabecera { display: flex; flex-wrap: wrap; gap: 2px 8px; font-size: 13px; }
+.comentario-autor { font-weight: 500; }
+.comentario-mensaje { margin-top: 4px; white-space: pre-line; overflow-wrap: anywhere; }
+.editado { font-style: italic; }
+.ver-todos { margin-left: -8px; }
 
 .centrado { display: flex; justify-content: center; padding: 48px 0; }
 .vacio { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 40px 16px; }
@@ -34,5 +42,5 @@
 .vacio p { margin: 0 0 16px; }
 
 @supports (corner-shape: squircle) {
-  .foto, .etiqueta { corner-shape: squircle; }
+  .foto, .etiqueta, .comentario { corner-shape: squircle; }
 }
