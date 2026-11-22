@@ -1,0 +1,164 @@
+<div class="contenedor">
+  <a mat-button class="volver" routerLink="/publicaciones">
+    <mat-icon>arrow_back</mat-icon>
+    Volver a publicaciones
+  </a>
+
+  @if (!sesion.activa()) {
+    <mat-card>
+      <mat-card-content class="vacio">
+        <mat-icon>lock</mat-icon>
+        <h2>Ingresá para ver la publicación</h2>
+        <p class="texto-suave">Necesitás iniciar sesión para ver las publicaciones y sus comentarios.</p>
+        <a mat-flat-button routerLink="/login">Ingresar</a>
+      </mat-card-content>
+    </mat-card>
+  } @else if (errorPublicacion(); as error) {
+    <mat-card>
+      <mat-card-content class="vacio">
+        <mat-icon>error_outline</mat-icon>
+        <h2>{{ error.titulo }}</h2>
+        <p class="texto-suave">{{ error.mensaje }}</p>
+        @if (error.reintentable) {
+          <button mat-flat-button type="button" (click)="cargar()">Reintentar</button>
+        } @else {
+          <a mat-flat-button routerLink="/publicaciones">Ir a publicaciones</a>
+        }
+      </mat-card-content>
+    </mat-card>
+  } @else if (publicacion(); as p) {
+    <!-- la misma tarjeta de la lista, en version grande. aca no hay "eliminar" ni enlace a esta misma pagina -->
+    <app-publicacion-card
+      [publicacion]="p"
+      [esPropia]="false"
+      [conEnlace]="false"
+      [grande]="true"
+      [ocupada]="procesandoMeGusta()"
+      (alternarMeGusta)="alternarMeGusta()"
+    />
+
+    <section class="comentarios" aria-labelledby="titulo-comentarios">
+      <h2 id="titulo-comentarios" class="subtitulo">
+        Comentarios
+        @if (total() > 0) {
+          <span class="texto-suave">({{ total() }})</span>
+        }
+      </h2>
+
+      @if (comentarios(); as lista) {
+        <mat-card class="nuevo">
+          <mat-card-content>
+            <form class="formulario" [formGroup]="nuevoForm" (ngSubmit)="enviarComentario()" novalidate>
+              <mat-form-field appearance="outline">
+                <mat-label>Escribí un comentario</mat-label>
+                <textarea matInput rows="3" formControlName="mensaje"></textarea>
+                <mat-hint align="end">{{ nuevoForm.controls.mensaje.value.length }}/{{ maxCaracteres }}</mat-hint>
+                <mat-error>{{ mensajeError(nuevoForm.controls.mensaje) }}</mat-error>
+              </mat-form-field>
+              <div class="acciones">
+                <button mat-flat-button type="submit" [disabled]="enviando()">
+                  @if (enviando()) {
+                    <mat-spinner diameter="20" />
+                    <span>Publicando…</span>
+                  } @else {
+                    Comentar
+                  }
+                </button>
+              </div>
+            </form>
+          </mat-card-content>
+        </mat-card>
+
+        @if (lista.length === 0) {
+          <p class="texto-suave sin-comentarios">Todavía no hay comentarios. ¡Escribí el primero!</p>
+        } @else {
+          <div class="lista-comentarios">
+            @for (c of lista; track c.id) {
+              <article class="comentario">
+                <header class="cabecera-comentario">
+                  @if (c.autor.imagenPerfilUrl; as foto) {
+                    <img class="avatar" [src]="foto" alt="" />
+                  } @else {
+                    <mat-icon class="avatar avatar-vacio">account_circle</mat-icon>
+                  }
+                  <div class="autor">
+                    <span class="nombre">{{ c.autor.nombre }} {{ c.autor.apellido }}</span>
+                    <span class="texto-suave detalle">
+                      &#64;{{ c.autor.nombreUsuario }} · {{ c.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+                      @if (c.modificado) {
+                        · <span class="editado">(editado)</span>
+                      }
+                    </span>
+                  </div>
+                </header>
+
+                @if (editandoId() === c.id) {
+                  <form class="formulario" [formGroup]="edicionForm" (ngSubmit)="guardarEdicion(c)" novalidate>
+                    <mat-form-field appearance="outline">
+                      <mat-label>Editar comentario</mat-label>
+                      <textarea matInput rows="3" formControlName="mensaje"></textarea>
+                      <mat-hint align="end">{{ edicionForm.controls.mensaje.value.length }}/{{ maxCaracteres }}</mat-hint>
+                      <mat-error>{{ mensajeError(edicionForm.controls.mensaje) }}</mat-error>
+                    </mat-form-field>
+                    <div class="acciones">
+                      <button mat-flat-button type="submit" [disabled]="guardando()">
+                        @if (guardando()) {
+                          <mat-spinner diameter="20" />
+                          <span>Guardando…</span>
+                        } @else {
+                          Guardar
+                        }
+                      </button>
+                      <button mat-button type="button" [disabled]="guardando()" (click)="cancelarEdicion()">Cancelar</button>
+                    </div>
+                  </form>
+                } @else {
+                  <p class="mensaje">{{ c.mensaje }}</p>
+                  @if (esPropio(c)) {
+                    <div class="acciones-comentario">
+                      <button mat-button type="button" (click)="empezarEdicion(c)">
+                        <mat-icon>edit</mat-icon>
+                        Editar
+                      </button>
+                    </div>
+                  }
+                }
+              </article>
+            }
+          </div>
+        }
+
+        @if (errorComentarios(); as mensaje) {
+          <div class="error-comentarios">
+            <p class="texto-suave">{{ mensaje }}</p>
+            <button mat-stroked-button type="button" (click)="cargarComentarios()">Reintentar</button>
+          </div>
+        } @else if (hayMas()) {
+          <div class="mas">
+            <button mat-stroked-button type="button" [disabled]="cargandoComentarios()" (click)="cargarComentarios()">
+              @if (cargandoComentarios()) {
+                <mat-spinner diameter="20" />
+                <span>Cargando…</span>
+              } @else {
+                Cargar más comentarios
+              }
+            </button>
+          </div>
+        }
+      } @else if (errorComentarios(); as mensaje) {
+        <mat-card>
+          <mat-card-content class="vacio">
+            <mat-icon>error_outline</mat-icon>
+            <h3>No se pudieron cargar los comentarios</h3>
+            <p class="texto-suave">{{ mensaje }}</p>
+            <button mat-flat-button type="button" (click)="cargarComentarios()">Reintentar</button>
+          </mat-card-content>
+        </mat-card>
+      } @else {
+        <div class="centrado"><mat-spinner diameter="40" /></div>
+      }
+    </section>
+  } @else {
+    <div class="centrado"><mat-spinner diameter="48" /></div>
+  }
+</div>

@@ -1,4 +1,4 @@
-<mat-card class="publicacion">
+<mat-card class="publicacion" [class.grande]="grande()">
   <header class="cabecera">
     @if (publicacion().autor.imagenPerfilUrl; as foto) {
       <img class="avatar" [src]="foto" alt="" />
@@ -35,6 +35,13 @@
       <mat-icon>{{ publicacion().meGusta ? 'favorite' : 'favorite_border' }}</mat-icon>
       {{ publicacion().cantidadMeGusta }}
     </button>
+
+    @if (conEnlace()) {
+      <a mat-button class="ver" [routerLink]="['/publicaciones', publicacion().id]">
+        <mat-icon>chat_bubble_outline</mat-icon>
+        Comentarios
+      </a>
+    }
 
     <span class="espaciador"></span>
 

@@ -1,0 +1,39 @@
+.volver { margin: 0 0 12px -8px; }
+.subtitulo { margin: 36px 0 16px; font-size: 22px; font-weight: 500; }
+
+/* margen derecho y abajo: dejan lugar a la sombra dura de las tarjetas */
+.nuevo { margin: 0 6px 24px 0; }
+.sin-comentarios { margin: 0 0 16px; }
+
+/* cada comentario: una caja con borde, mas liviana que las tarjetas de publicacion */
+.lista-comentarios { display: flex; flex-direction: column; gap: 14px; margin: 0 6px 16px 0; }
+.comentario { padding: 14px 16px; background: var(--fl-papel); border: 2px solid var(--fl-oscuro); border-radius: 16px; }
+
+.cabecera-comentario { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.avatar { width: 36px; height: 36px; flex: none; object-fit: cover; border-radius: 10px; border: 2px solid var(--fl-oscuro); }
+.avatar-vacio { font-size: 36px; border: none; color: var(--fl-marron); }
+.autor { display: flex; flex-direction: column; min-width: 0; }
+.nombre { font-weight: 500; }
+.detalle { font-size: 13px; }
+.editado { font-style: italic; }
+
+/* pre-line respeta los saltos de linea que escribio el autor */
+.mensaje { margin: 0; white-space: pre-line; overflow-wrap: anywhere; }
+.acciones-comentario { display: flex; justify-content: flex-end; margin-top: 4px; }
+
+.mas { display: flex; justify-content: center; margin: 8px 6px 24px 0; }
+.error-comentarios { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 8px 0 24px; text-align: center; }
+.error-comentarios p { margin: 0; }
+
+/* los botones de enviar muestran el spinner al lado del texto */
+button[type='submit'], .mas button { display: inline-flex; align-items: center; gap: 8px; }
+
+.centrado { display: flex; justify-content: center; padding: 48px 0; }
+.vacio { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 40px 16px; }
+.vacio mat-icon { width: 64px; height: 64px; font-size: 64px; color: var(--fl-marron); }
+.vacio h2, .vacio h3 { margin: 16px 0 4px; font-weight: 500; }
+.vacio p { margin: 0 0 16px; }
+
+@supports (corner-shape: squircle) {
+  .comentario, .avatar { corner-shape: squircle; }
+}

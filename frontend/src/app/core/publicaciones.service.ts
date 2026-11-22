@@ -23,6 +23,11 @@ export class PublicacionesService {
     return this.http.get<PaginaPublicaciones>(this.api, { params });
   }
 
+  // GET /publicaciones/:id (una sola publicacion, para su pagina)
+  obtener(id: string): Observable<Publicacion> {
+    return this.http.get<Publicacion>(`${this.api}/${id}`);
+  }
+
   // POST /publicaciones (multipart: titulo, descripcion y, opcional, el archivo "imagen")
   crear(datos: FormData): Observable<Publicacion> {
     return this.http.post<Publicacion>(this.api, datos);
