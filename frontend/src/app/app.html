@@ -7,6 +7,10 @@
   <nav class="enlaces">
     <a mat-button routerLink="/publicaciones" routerLinkActive="activo">Publicaciones</a>
     <a mat-button routerLink="/mi-perfil" routerLinkActive="activo">Mi perfil</a>
+    <ng-container *appSoloAdmin>
+      <a mat-button routerLink="/dashboard/usuarios" routerLinkActive="activo">Usuarios</a>
+      <a mat-button routerLink="/dashboard/estadisticas" routerLinkActive="activo">Estadísticas</a>
+    </ng-container>
     <a mat-button routerLink="/login" routerLinkActive="activo">Ingresar</a>
     <a mat-flat-button routerLink="/registro">Registrarme</a>
   </nav>

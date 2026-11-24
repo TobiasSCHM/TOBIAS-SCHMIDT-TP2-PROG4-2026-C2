@@ -27,14 +27,16 @@
       </mat-card-content>
     </mat-card>
   } @else if (publicacion(); as p) {
-    <!-- la misma tarjeta de la lista, en version grande. aca no hay "eliminar" ni enlace a esta misma pagina -->
+    <!-- la misma tarjeta de la lista, en version grande. sin enlace a esta misma pagina; "eliminar" solo para administradores -->
     <app-publicacion-card
       [publicacion]="p"
       [esPropia]="false"
+      [esAdministrador]="esAdmin()"
       [conEnlace]="false"
       [grande]="true"
-      [ocupada]="procesandoMeGusta()"
+      [ocupada]="procesandoMeGusta() || eliminando()"
       (alternarMeGusta)="alternarMeGusta()"
+      (eliminar)="eliminar()"
     />
 
     <section class="comentarios" aria-labelledby="titulo-comentarios">
@@ -77,14 +79,15 @@
               <article class="comentario">
                 <header class="cabecera-comentario">
                   @if (c.autor.imagenPerfilUrl; as foto) {
-                    <img class="avatar" [src]="foto" alt="" />
+                    <img class="avatar" [src]="foto" alt="" appImagenRespaldo />
                   } @else {
                     <mat-icon class="avatar avatar-vacio">account_circle</mat-icon>
                   }
                   <div class="autor">
-                    <span class="nombre">{{ c.autor.nombre }} {{ c.autor.apellido }}</span>
+                    <span class="nombre">{{ c.autor | nombreCompleto }}</span>
                     <span class="texto-suave detalle">
-                      &#64;{{ c.autor.nombreUsuario }} · {{ c.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+                      &#64;{{ c.autor.nombreUsuario }} ·
+                      <span [title]="c.createdAt | date: 'dd/MM/yyyy HH:mm'">{{ c.createdAt | tiempoRelativo }}</span>
                       @if (c.modificado) {
                         · <span class="editado">(editado)</span>
                       }
@@ -96,7 +99,7 @@
                   <form class="formulario" [formGroup]="edicionForm" (ngSubmit)="guardarEdicion(c)" novalidate>
                     <mat-form-field appearance="outline">
                       <mat-label>Editar comentario</mat-label>
-                      <textarea matInput rows="3" formControlName="mensaje"></textarea>
+                      <textarea matInput rows="3" formControlName="mensaje" appAutoEnfocar></textarea>
                       <mat-hint align="end">{{ edicionForm.controls.mensaje.value.length }}/{{ maxCaracteres }}</mat-hint>
                       <mat-error>{{ mensajeError(edicionForm.controls.mensaje) }}</mat-error>
                     </mat-form-field>

@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -29,6 +29,8 @@ export class Publicaciones {
   private readonly servicio = inject(PublicacionesService);
   private readonly modal = inject(ModalService);
   protected readonly sesion = inject(SesionService);
+  //el administrador puede dar de baja cualquier publicacion
+  protected readonly esAdmin = computed(() => this.sesion.usuario()?.perfil === 'administrador');
 
   protected readonly opcionesTamanio = [5, 10, 20];
 
@@ -121,7 +123,8 @@ export class Publicaciones {
 
   protected async eliminar(publicacion: Publicacion): Promise<void> {
     const confirmo = await this.modal.confirmar(
-      `¿Querés eliminar «${publicacion.titulo}»? Esta acción no se puede deshacer.`,
+      `¿Querés eliminar «${publicacion.titulo}»? Esta acción no se puede deshacer: ` +
+      'la publicación y sus comentarios dejarán de estar disponibles.',
       'Eliminar publicación',
       'Eliminar',
       'Cancelar',

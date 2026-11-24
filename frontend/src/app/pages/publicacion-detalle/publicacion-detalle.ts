@@ -9,7 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ComentariosService } from '../../core/comentarios.service';
 import { mensajeDeError } from '../../core/errores';
@@ -19,6 +19,10 @@ import { PublicacionesService } from '../../core/publicaciones.service';
 import { SesionService } from '../../core/sesion.service';
 import { ModalService } from '../../shared/modal/modal.service';
 import { PublicacionCard } from '../../shared/publicacion-card/publicacion-card';
+import { AutoEnfocarDirective } from '../../shared/directives/auto-enfocar.directive';
+import { ImagenRespaldoDirective } from '../../shared/directives/imagen-respaldo.directive';
+import { NombreCompletoPipe } from '../../shared/pipes/nombre-completo.pipe';
+import { TiempoRelativoPipe } from '../../shared/pipes/tiempo-relativo.pipe';
 
 const LIMITE = 5; // comentarios por carga: la primera vez y cada vez que se toca "cargar mas"
 const MAX_CARACTERES = 350; // el mismo limite que el backend
@@ -32,6 +36,7 @@ const REGLAS = [Validators.required, Validators.pattern(/\S/), Validators.maxLen
   selector: 'app-publicacion-detalle',
   imports: [
     DatePipe, ReactiveFormsModule, RouterLink, MatButtonModule, MatCardModule, MatFormFieldModule,
+    AutoEnfocarDirective, ImagenRespaldoDirective, NombreCompletoPipe, TiempoRelativoPipe,
     MatIconModule, MatInputModule, MatProgressSpinnerModule, PublicacionCard,
   ],
   templateUrl: './publicacion-detalle.html',
@@ -42,6 +47,7 @@ export class PublicacionDetalle {
   private readonly publicaciones = inject(PublicacionesService);
   private readonly comentariosApi = inject(ComentariosService);
   private readonly modal = inject(ModalService);
+  private readonly router = inject(Router);
   protected readonly sesion = inject(SesionService);
 
   protected readonly maxCaracteres = MAX_CARACTERES;
@@ -53,6 +59,9 @@ export class PublicacionDetalle {
   protected readonly publicacion = signal<Publicacion | null>(null);
   protected readonly errorPublicacion = signal<{ titulo: string; mensaje: string; reintentable: boolean } | null>(null);
   protected readonly procesandoMeGusta = signal(false);
+  protected readonly eliminando = signal(false);
+  //solo el administrador ve el boton de eliminar en esta pagina (el backend lo vuelve a comprobar)
+  protected readonly esAdmin = computed(() => this.sesion.usuario()?.perfil === 'administrador');
 
   // comentarios. null = todavia no se cargaron (muestra el spinner); lista vacia = no hay comentarios
   protected readonly comentarios = signal<Comentario[] | null>(null);
@@ -133,6 +142,37 @@ export class PublicacionDetalle {
     } finally {
       this.procesandoMeGusta.set(false);
     }
+  }
+  
+  //baja logica de la publicacion (solo administradores). al eliminarla, tambien dejan de estar
+  // disponibles sus comentarios (el backend responde 404). despues se vuelve al listado
+  protected async eliminar(): Promise<void> {
+    const actual = this.publicacion();
+    if (!actual || this.eliminando()) return;
+
+    const confirmo = await this.modal.confirmar(
+      `¿Querés eliminar «${actual.titulo}»? Esta acción no se puede deshacer: ` +
+        'la publicación y sus comentarios dejarán de estar disponibles.',
+      'Eliminar publicación',
+      'Eliminar',
+      'Cancelar',
+    );
+    if (!confirmo) return;
+
+    this.eliminando.set(true);
+    try {
+      await firstValueFrom(this.publicaciones.eliminar(actual.id));
+    } catch (error) {
+      await this.modal.error(mensajeDeError(error), 'No se pudo eliminar la publicación');
+      // 404: alguien mas ya la elimino. se vuelve a cargar para mostrar que ya no existe
+      if (error instanceof HttpErrorResponse && error.status === 404) await this.cargar();
+      return;
+    } finally {
+      this.eliminando.set(false);
+    }
+
+    await this.modal.informar('La publicación fue eliminada.', 'Publicación eliminada');
+    await this.router.navigateByUrl('/publicaciones');
   }
 
   protected esPropio(comentario: Comentario): boolean {

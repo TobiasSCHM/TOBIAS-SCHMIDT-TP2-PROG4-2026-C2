@@ -14,6 +14,10 @@ import { PublicacionesService } from '../../core/publicaciones.service';
 import { SesionService } from '../../core/sesion.service';
 import { ModalService } from '../../shared/modal/modal.service';
 import { PublicacionCard } from '../../shared/publicacion-card/publicacion-card';
+import { ImagenRespaldoDirective } from '../../shared/directives/imagen-respaldo.directive';
+import { EtiquetaPerfilPipe } from '../../shared/pipes/etiqueta-perfil.pipe';
+import { NombreCompletoPipe } from '../../shared/pipes/nombre-completo.pipe';
+import { TiempoRelativoPipe } from '../../shared/pipes/tiempo-relativo.pipe';
 
 const COMENTARIOS_POR_PUBLICACION = 3; // de cada publicacion se muestran los 3 comentarios mas recientes
 
@@ -26,7 +30,7 @@ type ComentariosDePublicacion = PaginaComentarios | null | undefined;
   selector: 'app-mi-perfil',
   imports: [
     DatePipe, RouterLink, MatButtonModule, MatCardModule, MatIconModule, MatProgressSpinnerModule,
-    PublicacionCard,
+    PublicacionCard, ImagenRespaldoDirective, NombreCompletoPipe, EtiquetaPerfilPipe, TiempoRelativoPipe,
   ],
   templateUrl: './mi-perfil.html',
   styleUrl: './mi-perfil.css',

@@ -13,6 +13,7 @@ import { mensajeDeError } from '../../core/errores';
 import { SesionService } from '../../core/sesion.service';
 import { contrasenaFuerte, correoONombreUsuario } from '../../core/validators/validadores';
 import { ModalService } from '../../shared/modal/modal.service';
+import { HttpErrorResponse } from '@angular/common/http';
 
 type CampoLogin = 'identificador' | 'contrasena';
 
@@ -77,9 +78,10 @@ export class Login {
       this.sesion.iniciar(token, usuario);
       await this.modal.informar(`Hola, ${usuario.nombre}. Ingresaste correctamente.`, 'Ingreso exitoso');
       await this.router.navigateByUrl('/publicaciones');
-    } catch (error) {
-      await this.modal.error(mensajeDeError(error), 'No se pudo ingresar');
-      // se conserva el usuario escrito y se vacia la contrasena (reset tambien oculta su mensaje de error)
+        } catch (error) {
+      //403 = la cuenta esta deshabilitada (el mensaje lo manda el servidor)
+      const deshabilitada = error instanceof HttpErrorResponse && error.status === 403;
+      await this.modal.error(mensajeDeError(error), deshabilitada ? 'Cuenta deshabilitada' : 'No se pudo ingresar');
       this.form.controls.contrasena.reset('');
     } finally {
       this.cargando.set(false);

@@ -1,0 +1,100 @@
+<div class="contenedor">
+  <h1 class="titulo-pagina">Estadísticas</h1>
+  <p class="texto-suave">
+    Elegí el período de cada gráfico. Solo se cuentan las publicaciones habilitadas y sus comentarios.
+  </p>
+
+  <!-- gráfico 1: dona -->
+  <mat-card class="tarjeta">
+    <mat-card-header>
+      <mat-card-title>Publicaciones por usuario</mat-card-title>
+      <mat-card-subtitle>Usuarios que más publicaron en el período</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <app-selector-periodo [periodo]="porUsuario.periodo()" (periodoChange)="porUsuario.cambiarPeriodo($event)" />
+
+      @if (porUsuario.cargando()) {
+        <div class="estado"><mat-spinner diameter="40" /></div>
+      } @else if (porUsuario.error(); as mensaje) {
+        <div class="estado">
+          <mat-icon>error_outline</mat-icon>
+          <p>{{ mensaje }}</p>
+          <button mat-flat-button type="button" (click)="porUsuario.cargar()">Reintentar</button>
+        </div>
+      } @else if (graficoPorUsuario(); as configuracion) {
+        <app-grafico [configuracion]="configuracion" descripcion="Gráfico de dona con las publicaciones de cada usuario" />
+        @if (porUsuario.datos(); as resumen) {
+          <p class="texto-suave resumen">
+            Total del período: {{ resumen.totalPublicaciones }} publicaciones de {{ resumen.totalUsuarios }} usuarios.
+            @if (resumen.totalUsuarios > resumen.datos.length) {
+              Se muestran los {{ resumen.datos.length }} que más publicaron.
+            }
+          </p>
+        }
+      } @else {
+        <div class="estado"><mat-icon>bar_chart</mat-icon><p>No hay publicaciones en este período.</p></div>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <!-- gráfico 2: línea -->
+  <mat-card class="tarjeta">
+    <mat-card-header>
+      <mat-card-title>Comentarios por día</mat-card-title>
+      <mat-card-subtitle>Cantidad de comentarios realizados en el período</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <app-selector-periodo [periodo]="porDia.periodo()" (periodoChange)="porDia.cambiarPeriodo($event)" />
+
+      @if (porDia.cargando()) {
+        <div class="estado"><mat-spinner diameter="40" /></div>
+      } @else if (porDia.error(); as mensaje) {
+        <div class="estado">
+          <mat-icon>error_outline</mat-icon>
+          <p>{{ mensaje }}</p>
+          <button mat-flat-button type="button" (click)="porDia.cargar()">Reintentar</button>
+        </div>
+      } @else if (graficoPorDia(); as configuracion) {
+        <app-grafico [configuracion]="configuracion" descripcion="Gráfico de líneas con los comentarios de cada día" />
+        @if (porDia.datos(); as resumen) {
+          <p class="texto-suave resumen">Total del período: {{ resumen.total }} comentarios.</p>
+        }
+      } @else {
+        <div class="estado"><mat-icon>show_chart</mat-icon><p>No hay comentarios en este período.</p></div>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <!-- gráfico 3: barras -->
+  <mat-card class="tarjeta">
+    <mat-card-header>
+      <mat-card-title>Comentarios por publicación</mat-card-title>
+      <mat-card-subtitle>Publicaciones que más comentarios recibieron en el período</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <app-selector-periodo [periodo]="porPublicacion.periodo()" (periodoChange)="porPublicacion.cambiarPeriodo($event)" />
+
+      @if (porPublicacion.cargando()) {
+        <div class="estado"><mat-spinner diameter="40" /></div>
+      } @else if (porPublicacion.error(); as mensaje) {
+        <div class="estado">
+          <mat-icon>error_outline</mat-icon>
+          <p>{{ mensaje }}</p>
+          <button mat-flat-button type="button" (click)="porPublicacion.cargar()">Reintentar</button>
+        </div>
+      } @else if (graficoPorPublicacion(); as configuracion) {
+        <app-grafico [configuracion]="configuracion" descripcion="Gráfico de barras con los comentarios de cada publicación" />
+        @if (porPublicacion.datos(); as resumen) {
+          <p class="texto-suave resumen">
+            Total del período: {{ resumen.totalComentarios }} comentarios en {{ resumen.totalPublicaciones }} publicaciones.
+            @if (resumen.totalPublicaciones > resumen.datos.length) {
+              Se muestran las {{ resumen.datos.length }} con más comentarios.
+            }
+          </p>
+        }
+      } @else {
+        <div class="estado"><mat-icon>bar_chart</mat-icon><p>No hay comentarios en este período.</p></div>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

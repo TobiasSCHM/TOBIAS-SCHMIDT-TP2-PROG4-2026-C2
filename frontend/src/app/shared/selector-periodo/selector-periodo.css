@@ -1,0 +1,4 @@
+.selector { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.selector mat-form-field { width: 170px; }
+.atajos { display: flex; flex-wrap: wrap; gap: 8px; }
+.error-texto { margin: 8px 0 0; font-size: 13px; color: #c62828; }

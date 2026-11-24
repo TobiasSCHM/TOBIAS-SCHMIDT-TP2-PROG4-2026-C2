@@ -6,6 +6,8 @@ import { UsuariosModule } from '../usuarios/usuarios.module.js';
 import { ComentariosController } from './comentarios.controller.js';
 import { ComentariosService } from './comentarios.service.js';
 import { Comentario, ComentarioSchema } from './comentario.schema.js';
+import { EstadisticasController } from './estadisticas.controller.js';
+import { EstadisticasService } from './estadisticas.service.js';
 import { MeGusta, MeGustaSchema } from './megusta.schema.js';
 import { PublicacionesController } from './publicaciones.controllers.js';
 import { PublicacionesService } from './publicaciones.service.js';
@@ -22,7 +24,7 @@ import { Publicacion, PublicacionSchema } from './publicacion.schema.js';
     AutenticacionModule, // el guard necesita TokenService para verificar el token
     AlmacenamientoModule, // para subir la imagen a cloudinary
   ],
-  controllers: [PublicacionesController, ComentariosController],
-  providers: [PublicacionesService, ComentariosService],
+  controllers: [PublicacionesController, ComentariosController, EstadisticasController],
+  providers: [PublicacionesService, ComentariosService, EstadisticasService],
 })
 export class PublicacionesModule {}

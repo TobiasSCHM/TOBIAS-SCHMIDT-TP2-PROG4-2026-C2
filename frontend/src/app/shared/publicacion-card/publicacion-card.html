@@ -1,14 +1,15 @@
 <mat-card class="publicacion" [class.grande]="grande()">
   <header class="cabecera">
     @if (publicacion().autor.imagenPerfilUrl; as foto) {
-      <img class="avatar" [src]="foto" alt="" />
+      <img class="avatar" [src]="foto" alt="" appImagenRespaldo />
     } @else {
       <mat-icon class="avatar avatar-vacio">account_circle</mat-icon>
     }
     <div class="autor">
-      <span class="nombre">{{ nombreAutor() }}</span>
+      <span class="nombre">{{ publicacion().autor | nombreCompleto }}</span>  
       <span class="texto-suave detalle">
-        &#64;{{ publicacion().autor.nombreUsuario }} · {{ publicacion().createdAt | date: 'dd/MM/yyyy HH:mm' }}
+        &#64;{{ publicacion().autor.nombreUsuario }} ·
+        <span [title]="publicacion().createdAt | date: 'dd/MM/yyyy HH:mm'">{{ publicacion().createdAt | tiempoRelativo }}</span>
       </span>
     </div>
   </header>
@@ -17,7 +18,7 @@
     <h2 class="titulo">{{ publicacion().titulo }}</h2>
     <p class="descripcion">{{ publicacion().descripcion }}</p>
     @if (publicacion().imagenUrl; as url) {
-      <img class="imagen" [src]="url" [alt]="'Imagen de la publicación ' + publicacion().titulo" loading="lazy" />
+      <img class="imagen" [src]="url" [alt]="'Imagen de la publicación ' + publicacion().titulo" loading="lazy" appImagenRespaldo="imagen" />
     }
   </mat-card-content>
 
@@ -45,7 +46,7 @@
 
     <span class="espaciador"></span>
 
-    @if (esPropia()) {
+      @if (esPropia() || esAdministrador()) {
       <button mat-button type="button" (click)="eliminar.emit(publicacion())">
         <mat-icon>delete</mat-icon>
         Eliminar

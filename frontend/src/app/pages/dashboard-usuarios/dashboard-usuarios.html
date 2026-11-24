@@ -1,0 +1,176 @@
+<div class="contenedor">
+  <h1 class="titulo-pagina">Usuarios</h1>
+  <p class="texto-suave">Creá cuentas y habilitá o deshabilitá el acceso de los usuarios de FireLink.</p>
+
+  <div class="barra-acciones">
+    <button mat-flat-button type="button" (click)="alternarFormulario()">
+      <mat-icon>{{ mostrarFormulario() ? 'close' : 'person_add' }}</mat-icon>
+      {{ mostrarFormulario() ? 'Cerrar formulario' : 'Nuevo usuario' }}
+    </button>
+  </div>
+
+  @if (mostrarFormulario()) {
+    <mat-card class="tarjeta-formulario">
+      <mat-card-header>
+        <mat-card-title>Nuevo usuario</mat-card-title>
+        <mat-card-subtitle>Los mismos datos que el registro, más el perfil</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <form class="formulario" [formGroup]="form" (ngSubmit)="crear()" novalidate>
+
+          <div class="bloque-imagen">
+            @if (vistaPrevia(); as src) {
+              <img class="avatar-grande" [src]="src" alt="Vista previa de la imagen de perfil" />
+            } @else {
+              <mat-icon class="avatar-vacio-grande">account_circle</mat-icon>
+            }
+            <div class="acciones-imagen">
+              <button mat-stroked-button type="button" (click)="archivo.click()">
+                <mat-icon>photo_camera</mat-icon>
+                {{ imagen() ? 'Cambiar imagen' : 'Elegir imagen' }}
+              </button>
+              @if (imagen()) {
+                <button mat-button type="button" (click)="quitarImagen(archivo)">Quitar</button>
+              }
+              <input #archivo type="file" hidden accept="image/png,image/jpeg,image/webp" (change)="elegirImagen($event)" />
+              <p class="texto-suave">Opcional. JPG, PNG o WEBP de hasta 2 MB.</p>
+              @if (errorImagen(); as mensaje) {
+                <p class="error-texto" role="alert">{{ mensaje }}</p>
+              }
+            </div>
+          </div>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre</mat-label>
+            <input matInput formControlName="nombre" autocomplete="off" appAutoEnfocar />
+            <mat-error>{{ mensajeError('nombre') }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Apellido</mat-label>
+            <input matInput formControlName="apellido" autocomplete="off" />
+            <mat-error>{{ mensajeError('apellido') }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Correo</mat-label>
+            <input matInput type="email" formControlName="correo" autocomplete="off" />
+            <mat-error>{{ mensajeError('correo') }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre de usuario</mat-label>
+            <input matInput formControlName="nombreUsuario" autocomplete="off" />
+            <mat-hint>De 3 a 20 caracteres: letras, números o guion bajo</mat-hint>
+            <mat-error>{{ mensajeError('nombreUsuario') }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Contraseña</mat-label>
+            <input matInput type="password" formControlName="contrasena" autocomplete="new-password" />
+            <mat-hint>Mínimo 8 caracteres, con una mayúscula y un número</mat-hint>
+            <mat-error>{{ mensajeError('contrasena') }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Repetir contraseña</mat-label>
+            <input matInput type="password" formControlName="repetirContrasena" autocomplete="new-password" />
+            <mat-error>{{ mensajeError('repetirContrasena') }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Fecha de nacimiento</mat-label>
+            <input matInput type="date" formControlName="fechaNacimiento" [max]="hoy" />
+            <mat-error>{{ mensajeError('fechaNacimiento') }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Descripción breve (opcional)</mat-label>
+            <textarea matInput rows="3" maxlength="200" formControlName="descripcion"></textarea>
+            <mat-hint align="end">{{ form.controls.descripcion.value.length }}/200</mat-hint>
+            <mat-error>{{ mensajeError('descripcion') }}</mat-error>
+          </mat-form-field>
+
+          <div class="grupo-perfil">
+            <span id="etiqueta-perfil" class="etiqueta-perfil">Perfil del nuevo usuario</span>
+            <mat-radio-group formControlName="perfil" aria-labelledby="etiqueta-perfil">
+              <mat-radio-button value="usuario">Usuario</mat-radio-button>
+              <mat-radio-button value="administrador">Administrador</mat-radio-button>
+            </mat-radio-group>
+          </div>
+
+          <div class="acciones">
+            <button mat-flat-button type="submit" [disabled]="guardando()">
+              @if (guardando()) {
+                <mat-spinner diameter="20" />
+                <span>Creando…</span>
+              } @else {
+                Crear usuario
+              }
+            </button>
+            <button mat-button type="button" [disabled]="guardando()" (click)="alternarFormulario()">Cancelar</button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  @if (error(); as mensaje) {
+    <mat-card>
+      <mat-card-content class="vacio">
+        <mat-icon>error_outline</mat-icon>
+        <h2>No se pudieron cargar los usuarios</h2>
+        <p class="texto-suave">{{ mensaje }}</p>
+        <button mat-flat-button type="button" (click)="cargar()">Reintentar</button>
+      </mat-card-content>
+    </mat-card>
+  } @else if (usuarios(); as lista) {
+    <h2 class="subtitulo">Listado ({{ lista.length }})</h2>
+    <mat-card class="tarjeta-lista">
+      <ul class="lista-usuarios">
+        @for (u of lista; track u.id) {
+          <li class="fila" [class.deshabilitado]="!u.habilitado">
+            @if (u.imagenPerfilUrl; as foto) {
+              <img class="avatar" [src]="foto" alt="" appImagenRespaldo />
+            } @else {
+              <mat-icon class="avatar-vacio">account_circle</mat-icon>
+            }
+
+            <div class="datos">
+              <span class="nombre">{{ u | nombreCompleto }}</span>
+              <span class="texto-suave detalle">&#64;{{ u.nombreUsuario }} · {{ u.correo }}</span>
+              <span class="etiquetas">
+                <span class="etiqueta" [class.admin]="u.perfil === 'administrador'">
+                  {{ u.perfil | etiquetaPerfil }}
+                </span>
+                <span class="etiqueta" [class.estado-ok]="u.habilitado" [class.estado-off]="!u.habilitado">
+                  <mat-icon>{{ u.habilitado ? 'check_circle' : 'block' }}</mat-icon>
+                  {{ u.habilitado ? 'Habilitado' : 'Deshabilitado' }}
+                </span>
+              </span>
+            </div>
+
+            <div class="accion">
+              @if (u.id === miId()) {
+                <span class="texto-suave">Tu cuenta</span>
+              } @else if (u.habilitado) {
+                <button mat-stroked-button type="button" [disabled]="procesando().includes(u.id)" (click)="deshabilitar(u)">
+                  <mat-icon>block</mat-icon>
+                  Deshabilitar
+                </button>
+              } @else {
+                <button mat-flat-button type="button" [disabled]="procesando().includes(u.id)" (click)="habilitar(u)">
+                  <mat-icon>check_circle</mat-icon>
+                  Habilitar
+                </button>
+              }
+            </div>
+          </li>
+        }
+      </ul>
+    </mat-card>
+  } @else {
+    <div class="centrado"><mat-spinner diameter="48" /></div>
+  }
+</div>

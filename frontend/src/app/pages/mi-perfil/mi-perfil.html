@@ -6,14 +6,14 @@
     <mat-card class="datos">
       <div class="encabezado">
         @if (u.imagenPerfilUrl; as foto) {
-          <img class="foto" [src]="foto" alt="Tu foto de perfil" />
+          <img class="foto" [src]="foto" alt="Tu foto de perfil" appImagenRespaldo />
         } @else {
           <mat-icon class="foto foto-vacia">account_circle</mat-icon>
         }
         <div class="identidad">
-          <h2 class="nombre-completo">{{ u.nombre }} {{ u.apellido }}</h2>
+          <h2 class="nombre-completo">{{ u | nombreCompleto }}</h2>
           <span class="texto-suave">&#64;{{ u.nombreUsuario }}</span>
-          <span class="etiqueta">{{ u.perfil === 'administrador' ? 'Administrador' : 'Usuario' }}</span>
+          <span class="etiqueta">{{ u.perfil | etiquetaPerfil }}</span>
         </div>
       </div>
 
@@ -25,7 +25,7 @@
           <div><dt>Correo</dt><dd>{{ u.correo }}</dd></div>
           <!-- la fecha se guarda como medianoche UTC: se muestra en UTC para que no se corra al dia anterior -->
           <div><dt>Fecha de nacimiento</dt><dd>{{ u.fechaNacimiento | date: 'dd/MM/yyyy' : 'UTC' }}</dd></div>
-          <div><dt>Perfil</dt><dd>{{ u.perfil === 'administrador' ? 'Administrador' : 'Usuario' }}</dd></div>
+          <div><dt>Perfil</dt><dd>{{ u.perfil | etiquetaPerfil }}</dd></div>
           <div class="ancho"><dt>Descripción</dt><dd>{{ u.descripcion || 'Sin descripción.' }}</dd></div>
         </dl>
       </mat-card-content>
@@ -84,9 +84,10 @@
                   @for (comentario of c.datos; track comentario.id) {
                     <article class="comentario">
                       <div class="comentario-cabecera">
-                        <span class="comentario-autor">{{ comentario.autor.nombre }} {{ comentario.autor.apellido }}</span>
+                        <span class="comentario-autor">{{ comentario.autor | nombreCompleto }}</span>
                         <span class="texto-suave">
-                          &#64;{{ comentario.autor.nombreUsuario }} · {{ comentario.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+                          &#64;{{ comentario.autor.nombreUsuario }} ·
+                          <span [title]="comentario.createdAt | date: 'dd/MM/yyyy HH:mm'">{{ comentario.createdAt | tiempoRelativo }}</span>
                           @if (comentario.modificado) {
                             · <span class="editado">(editado)</span>
                           }

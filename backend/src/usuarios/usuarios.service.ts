@@ -1,7 +1,11 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { hash } from 'bcryptjs';
 import { isObjectIdOrHexString } from 'mongoose';
 import type { Model } from 'mongoose';
+import { AlmacenamientoService } from '../almacenamiento/almacenamiento.service.js';
+import type { ArchivoSubido } from '../almacenamiento/almacenamiento.service.js';
+import type { RegistroDto } from '../autenticacion/dto/registro.dto.js';
 import { Usuario } from './usuario.schema.js';
 import type { Perfil, UsuarioDocument } from './usuario.schema.js';
 
@@ -15,6 +19,7 @@ export interface NuevoUsuario {
   fechaNacimiento: Date;
   descripcion: string;
   imagenPerfilUrl: string | null;
+  perfil?: Perfil; // si no se indica, es "usuario"
 }
 
 // lo unico que sale hacia el cliente: nunca incluye la contrasena
@@ -33,7 +38,44 @@ export interface UsuarioPublico {
 
 @Injectable()
 export class UsuariosService {
-  constructor(@InjectModel(Usuario.name) private readonly modelo: Model<Usuario>) {}
+  constructor(
+    @InjectModel(Usuario.name) private readonly modelo: Model<Usuario>,
+    private readonly almacenamiento: AlmacenamientoService,
+  ) {}
+
+  // sprint 4: unico lugar donde se valida y se da de alta un usuario. lo usan el registro publico
+  // (AutenticacionService, perfil "usuario") y el alta del administrador (UsuariosController, con el perfil elegido)
+  async registrar(dto: RegistroDto, archivo?: ArchivoSubido, perfil: Perfil = 'usuario'): Promise<UsuarioDocument> {
+    if (dto.contrasena !== dto.repetirContrasena) {
+      throw new BadRequestException('Las contraseñas no coinciden.');
+    }
+
+    const fechaNacimiento = new Date(dto.fechaNacimiento);
+    if (Number.isNaN(fechaNacimiento.getTime()) || fechaNacimiento.getTime() > Date.now()) {
+      throw new BadRequestException('La fecha de nacimiento no es válida.');
+    }
+
+    // se revisa si el correo o el usuario ya existen ANTES de subir la imagen: asi un 409 no deja una imagen huerfana
+    await this.verificarDisponibles(dto.correo, dto.nombreUsuario);
+
+    // la imagen de perfil es opcional: sin archivo, la url queda en null
+    const imagenPerfilUrl = archivo ? await this.almacenamiento.subirImagen(archivo, 'redsocial/perfiles') : null;
+
+    // se guarda el hash, nunca la contrasena. bcrypt agrega una sal aleatoria propia a cada hash
+    const contrasenaHash = await hash(dto.contrasena, 10);
+
+    return this.crear({
+      nombre: dto.nombre,
+      apellido: dto.apellido,
+      correo: dto.correo,
+      nombreUsuario: dto.nombreUsuario,
+      contrasenaHash,
+      fechaNacimiento,
+      descripcion: dto.descripcion ?? '',
+      imagenPerfilUrl,
+      perfil,
+    });
+  }
 
   async crear(datos: NuevoUsuario): Promise<UsuarioDocument> {
     try {
@@ -46,10 +88,31 @@ export class UsuariosService {
         fechaNacimiento: datos.fechaNacimiento,
         descripcion: datos.descripcion,
         imagenPerfilUrl: datos.imagenPerfilUrl,
+        perfil: datos.perfil ?? 'usuario',
       });
     } catch (error) {
       throw this.traducirError(error);
     }
+  }
+
+  // sprint 4: todos los usuarios (habilitados y deshabilitados), los mas nuevos primero. la contrasena
+  // no sale: el esquema la oculta (select: false) y publico() tampoco la incluye
+  async listar(): Promise<UsuarioPublico[]> {
+    const usuarios = await this.modelo.find().sort({ createdAt: -1, _id: -1 }).exec();
+    return usuarios.map((u) => this.publico(u));
+  }
+
+  // sprint 4: baja logica. un administrador no puede deshabilitarse a si mismo (403). 404 si no existe, 409 si ya estaba deshabilitado
+  async deshabilitar(id: string, idAdministrador: string): Promise<UsuarioPublico> {
+    if (id.toLowerCase() === idAdministrador) {
+      throw new ForbiddenException('No podés deshabilitar tu propia cuenta.');
+    }
+    return this.cambiarEstado(id, false);
+  }
+
+  // sprint 4: alta logica. 404 si no existe, 409 si ya estaba habilitado
+  habilitar(id: string): Promise<UsuarioPublico> {
+    return this.cambiarEstado(id, true);
   }
 
   // responde 409 si el correo o el nombre de usuario ya existen. se llama ANTES de subir la imagen
@@ -96,6 +159,19 @@ export class UsuariosService {
       perfil: usuario.perfil,
       habilitado: usuario.habilitado,
     };
+  }
+
+  // habilita o deshabilita a un usuario. se actualiza con findByIdAndUpdate (solo toca "habilitado")
+  private async cambiarEstado(id: string, habilitado: boolean): Promise<UsuarioPublico> {
+    const actual = await this.buscarPorId(id);
+    if (!actual) throw new NotFoundException('El usuario no existe.');
+    if (actual.habilitado === habilitado) {
+      throw new ConflictException(habilitado ? 'El usuario ya está habilitado.' : 'El usuario ya está deshabilitado.');
+    }
+
+    const actualizado = await this.modelo.findByIdAndUpdate(actual._id, { habilitado }, { new: true }).exec();
+    if (!actualizado) throw new NotFoundException('El usuario no existe.');
+    return this.publico(actualizado);
   }
 
   // mongo responde con el codigo 11000 cuando se viola un indice unico (correo o nombre de usuario repetido)

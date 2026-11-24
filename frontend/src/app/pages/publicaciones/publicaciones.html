@@ -62,6 +62,7 @@
             <app-publicacion-card
               [publicacion]="publicacion"
               [esPropia]="esPropia(publicacion)"
+              [esAdministrador]="esAdmin()"
               [ocupada]="procesando().includes(publicacion.id)"
               (alternarMeGusta)="alternarMeGusta($event)"
               (eliminar)="eliminar($event)"
